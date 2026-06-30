@@ -18,6 +18,8 @@ export interface Person {
   tags: string[];
   notes: string | null;
   last_screened_at: string | null;
+  consent_to_contact: boolean;
+  signed_up_at: string | null;
   created_at: string;
   updated_at: string;
 }

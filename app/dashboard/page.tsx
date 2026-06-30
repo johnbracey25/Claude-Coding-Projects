@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/config";
+import ShareSignupLink from "@/components/ShareSignupLink";
 
 export default function DashboardPage() {
   return (
@@ -21,6 +22,10 @@ export default function DashboardPage() {
           </p>
         </div>
       )}
+
+      <div className="mt-6">
+        <ShareSignupLink />
+      </div>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <DashboardCard

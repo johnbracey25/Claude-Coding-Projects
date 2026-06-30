@@ -14,16 +14,22 @@ export default function Home() {
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Link
-          href="/dashboard"
+          href="/join"
           className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:bg-brand-dark"
+        >
+          Join a research study
+        </Link>
+        <Link
+          href="/dashboard"
+          className="rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-700 transition hover:bg-slate-50"
         >
           Staff sign in
         </Link>
       </div>
 
       <p className="max-w-md text-sm text-slate-400">
-        This is the internal staff portal. Participant booking links are sent by
-        email or text and open directly to a scheduling page.
+        Interested in taking part in a study? Tap &ldquo;Join a research
+        study.&rdquo; Staff use the sign-in to manage people and scheduling.
       </p>
     </main>
   );
