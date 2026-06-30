@@ -28,3 +28,55 @@ export interface Person {
 export type PersonInput = Partial<
   Omit<Person, "id" | "created_at" | "updated_at">
 >;
+
+// ── Studies ────────────────────────────────────────────────────────────────
+
+export type StudyStatus = "draft" | "recruiting" | "closed";
+
+export interface VisitDef {
+  name: string;
+  duration_min: number;
+  /** Required gap from the PRIOR visit (visit 1 ignores these). */
+  min_gap_days?: number;
+  max_gap_days?: number;
+}
+
+export interface VisitPlan {
+  visits: VisitDef[];
+}
+
+export interface Study {
+  id: string;
+  name: string;
+  description: string | null;
+  status: StudyStatus;
+  location: string | null;
+  start_window: string | null;
+  end_window: string | null;
+  eligibility_rules: { all: unknown[] };
+  visit_plan: VisitPlan;
+  compensation: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CandidateStatus =
+  | "eligible"
+  | "invited"
+  | "responded"
+  | "booked"
+  | "completed"
+  | "declined"
+  | "ineligible";
+
+export interface Candidate {
+  id: string;
+  study_id: string;
+  person_id: string;
+  status: CandidateStatus;
+  reasons: unknown;
+  matched_at: string;
+  invited_at: string | null;
+  responded_at: string | null;
+  notes: string | null;
+}

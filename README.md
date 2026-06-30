@@ -27,7 +27,8 @@ See [`CLAUDE.md`](./CLAUDE.md) for architecture and conventions.
 - [x] Phase 0 — Foundation (Next.js + Supabase scaffold)
 - [x] Phase 1 — People database + CSV import
 - [x] Public signup/recruitment page (`/join`) — shareable link for Nextdoor etc.
-- [ ] Phase 2 — Studies + eligibility rules
+- [x] Staff login + route protection (Supabase Auth)
+- [x] Phase 2 — Studies + eligibility rules + candidate matching
 - [ ] Phase 3 — Messaging (email + SMS)
 - [ ] Phase 4 — Google Calendar sync
 - [ ] Phase 5 — Self-booking with multi-visit rules

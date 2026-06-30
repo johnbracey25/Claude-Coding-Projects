@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signOut } from "@/app/login/actions";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -24,6 +25,14 @@ export default function AdminNav() {
             {l.label}
           </Link>
         ))}
+        <form action={signOut} className="ml-auto">
+          <button
+            type="submit"
+            className="rounded px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          >
+            Sign out
+          </button>
+        </form>
       </nav>
     </header>
   );
