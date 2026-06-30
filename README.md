@@ -25,7 +25,7 @@ See [`CLAUDE.md`](./CLAUDE.md) for architecture and conventions.
 ## Status
 
 - [x] Phase 0 — Foundation (Next.js + Supabase scaffold)
-- [ ] Phase 1 — People database + CSV import
+- [x] Phase 1 — People database + CSV import
 - [ ] Phase 2 — Studies + eligibility rules
 - [ ] Phase 3 — Messaging (email + SMS)
 - [ ] Phase 4 — Google Calendar sync
