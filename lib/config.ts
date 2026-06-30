@@ -12,3 +12,11 @@ export const isSupabaseConfigured =
 
 export const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+export const isEmailConfigured =
+  !!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM;
+
+export const isSmsConfigured =
+  !!process.env.TWILIO_ACCOUNT_SID &&
+  !!process.env.TWILIO_AUTH_TOKEN &&
+  !!process.env.TWILIO_FROM_NUMBER;

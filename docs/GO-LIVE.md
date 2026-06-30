@@ -45,6 +45,26 @@ you can paste into a Nextdoor post, and signups will flow into your People list.
 - On the dashboard, use **Share your signup link** to copy a tagged link
   (e.g. `…/join?src=nextdoor`) and post it.
 
+## 5. (Optional) Turn on email + text invites
+
+Invites work once you add these. Until then, the app still matches candidates and
+logs invites as "skipped".
+
+**Email — Resend (free tier):**
+1. Sign up at <https://resend.com>, verify a sending domain (or use their test domain).
+2. Create an API key. In Vercel env vars add:
+   - `RESEND_API_KEY` = your key
+   - `EMAIL_FROM` = `Eve Research <bookings@yourdomain.com>`
+
+**Text — Twilio:**
+1. Sign up at <https://twilio.com>, buy a phone number with SMS.
+2. In Vercel env vars add:
+   - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` (e.g. `+1512…`)
+3. In the Twilio number's **Messaging** config, set the inbound webhook to
+   `https://YOUR-URL/api/webhooks/twilio` so "STOP" opt-outs are honored.
+
+Redeploy after adding env vars.
+
 ## Notes
 
 - Want a custom domain (e.g. `studies.everesearch.com`)? Add it in Vercel →

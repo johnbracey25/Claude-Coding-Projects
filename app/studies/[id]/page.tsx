@@ -5,7 +5,13 @@ import SetupNotice from "@/components/SetupNotice";
 import { isSupabaseConfigured } from "@/lib/config";
 import { getStudy, listCandidates, type CandidateWithPerson } from "@/lib/studies";
 import { describeRule, type Rule } from "@/lib/eligibility";
-import { runMatchingAction, setCandidateStatus } from "../actions";
+import {
+  runMatchingAction,
+  setCandidateStatus,
+  inviteCandidate,
+  inviteAllEligible,
+} from "../actions";
+import { isEmailConfigured, isSmsConfigured } from "@/lib/config";
 import type { CandidateStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +57,8 @@ export default async function StudyDetailPage({
 
   const rules = (study.eligibility_rules?.all ?? []) as Rule[];
   const visits = study.visit_plan?.visits ?? [];
+  const eligibleCount = candidates.filter((c) => c.status === "eligible").length;
+  const messagingReady = isEmailConfigured || isSmsConfigured;
 
   return (
     <>
@@ -118,16 +126,36 @@ export default async function StudyDetailPage({
             Candidates{" "}
             <span className="text-slate-400">({candidates.length})</span>
           </h2>
-          <form action={runMatchingAction}>
-            <input type="hidden" name="study_id" value={study.id} />
-            <button
-              type="submit"
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
-            >
-              Find eligible people
-            </button>
-          </form>
+          <div className="flex gap-2">
+            {eligibleCount > 0 && (
+              <form action={inviteAllEligible}>
+                <input type="hidden" name="study_id" value={study.id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-brand px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-light/20"
+                >
+                  Invite all eligible ({eligibleCount})
+                </button>
+              </form>
+            )}
+            <form action={runMatchingAction}>
+              <input type="hidden" name="study_id" value={study.id} />
+              <button
+                type="submit"
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
+              >
+                Find eligible people
+              </button>
+            </form>
+          </div>
         </div>
+
+        {!messagingReady && (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            Email/SMS aren&apos;t configured yet, so invites will be logged as
+            &quot;skipped&quot; until you add Resend / Twilio keys. Everything else works.
+          </p>
+        )}
 
         {candidates.length === 0 ? (
           <p className="mt-4 text-slate-500">
@@ -183,24 +211,38 @@ function CandidateRow({
         </span>
       </td>
       <td className="px-4 py-2">
-        <form action={setCandidateStatus} className="flex items-center gap-1">
-          <input type="hidden" name="candidate_id" value={candidate.id} />
-          <input type="hidden" name="study_id" value={studyId} />
-          <select
-            name="status"
-            defaultValue={candidate.status}
-            className="rounded border border-slate-300 px-2 py-1 text-xs"
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="text-xs text-brand-dark hover:underline">
-            Set
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          {candidate.status === "eligible" && (
+            <form action={inviteCandidate}>
+              <input type="hidden" name="candidate_id" value={candidate.id} />
+              <input type="hidden" name="study_id" value={studyId} />
+              <button
+                type="submit"
+                className="rounded bg-brand px-2 py-1 text-xs font-medium text-white hover:bg-brand-dark"
+              >
+                Invite
+              </button>
+            </form>
+          )}
+          <form action={setCandidateStatus} className="flex items-center gap-1">
+            <input type="hidden" name="candidate_id" value={candidate.id} />
+            <input type="hidden" name="study_id" value={studyId} />
+            <select
+              name="status"
+              defaultValue={candidate.status}
+              className="rounded border border-slate-300 px-2 py-1 text-xs"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="text-xs text-brand-dark hover:underline">
+              Set
+            </button>
+          </form>
+        </div>
       </td>
     </tr>
   );

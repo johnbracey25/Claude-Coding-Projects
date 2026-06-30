@@ -29,7 +29,7 @@ See [`CLAUDE.md`](./CLAUDE.md) for architecture and conventions.
 - [x] Public signup/recruitment page (`/join`) — shareable link for Nextdoor etc.
 - [x] Staff login + route protection (Supabase Auth)
 - [x] Phase 2 — Studies + eligibility rules + candidate matching
-- [ ] Phase 3 — Messaging (email + SMS)
+- [x] Phase 3 — Messaging (email + SMS invites, responses, opt-out)
 - [ ] Phase 4 — Google Calendar sync
 - [ ] Phase 5 — Self-booking with multi-visit rules
 - [ ] Phase 6 — Reminders, dashboards, polish

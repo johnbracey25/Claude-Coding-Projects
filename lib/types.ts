@@ -79,4 +79,20 @@ export interface Candidate {
   invited_at: string | null;
   responded_at: string | null;
   notes: string | null;
+  token: string;
+  response: string | null;
+}
+
+export interface Message {
+  id: string;
+  person_id: string | null;
+  candidate_id: string | null;
+  channel: "email" | "sms";
+  direction: "outbound" | "inbound";
+  subject: string | null;
+  body: string | null;
+  status: "sent" | "failed" | "skipped";
+  provider_id: string | null;
+  error: string | null;
+  created_at: string;
 }
