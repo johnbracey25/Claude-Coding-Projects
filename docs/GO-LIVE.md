@@ -9,10 +9,9 @@ you can paste into a Nextdoor post, and signups will flow into your People list.
 2. Name it (e.g. `eve-research`), pick a region near you, set a database password
    (save it somewhere).
 3. When the project is ready, open **SQL Editor** → **New query**.
-4. Copy the contents of `supabase/migrations/0001_people.sql`, paste, click **Run**.
-5. Do the same for `supabase/migrations/0002_public_signup.sql`.
-   - (Run any higher-numbered migration files in order, too.)
-6. Go to **Project Settings → API** and copy these three values:
+4. Open `supabase/setup.sql` from this repo, copy the **whole file**, paste it into
+   the query box, and click **Run**. (This one file creates every table at once.)
+5. Go to **Project Settings → API** and copy these three values:
    - **Project URL**
    - **anon public** key
    - **service_role** key (keep this secret — it's like an admin password)
