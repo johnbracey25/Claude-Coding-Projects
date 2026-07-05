@@ -91,12 +91,12 @@ export default function Home() {
         <div className="flex flex-col items-center gap-10 md:flex-row md:gap-16">
           {/* Left column */}
           <div className="flex-1 text-center md:flex-[4] md:text-left">
-            <div className="mb-6 flex items-center gap-2.5 justify-center md:justify-start">
+            <div className="mb-8 flex items-center gap-4 justify-center md:justify-start">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/eve-icon.png" alt="" className="h-10 w-10 object-contain" />
+              <img src="/eve-icon.png" alt="" className="h-14 w-14 object-contain" />
               <div className="flex flex-col leading-none">
-                <span className="font-serif text-xl font-bold tracking-tight text-brand-dark">Eve</span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sage-dark">Research</span>
+                <span className="font-serif text-4xl font-bold tracking-tight text-brand-dark">Eve</span>
+                <span className="text-sm font-semibold uppercase tracking-[0.2em] text-sage-dark">Research</span>
               </div>
             </div>
             <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-brand-dark sm:text-5xl lg:text-6xl">
