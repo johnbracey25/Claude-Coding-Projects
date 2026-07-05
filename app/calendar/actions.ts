@@ -2,17 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { easternToUtcIso } from "@/lib/timezone";
 
 /**
- * Turn a datetime-local value ("2026-07-10T09:00") into a stored ISO. The time
- * is treated as wall-clock (stored as UTC) to match how it's displayed.
+ * Turn a datetime-local value ("2026-07-10T09:00"), entered in US Eastern, into
+ * a true UTC instant for storage.
  */
 function toIso(v: string): string | null {
-  if (!v) return null;
-  const m = v.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
-  if (!m) return null;
-  const d = new Date(`${m[1]}T${m[2]}:${m[3]}:00Z`);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+  return v ? easternToUtcIso(v) : null;
 }
 
 /** Add an availability window that participants can book into. */

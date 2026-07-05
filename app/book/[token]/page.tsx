@@ -44,7 +44,12 @@ export default async function BookPage({
       </div>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <BookingFlow token={data.token as string} visits={visits} />
+        <BookingFlow
+          token={data.token as string}
+          visits={visits}
+          studyName={study.name}
+          location={study.location}
+        />
       </div>
     </main>
   );
