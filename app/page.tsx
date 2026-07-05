@@ -121,13 +121,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right column -- logo icon */}
+          {/* Right column -- hero image */}
           <div className="flex flex-1 items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/eve-icon.png"
-              alt="Eve Research eye logo"
-              className="w-80 max-w-full object-contain sm:w-96 md:w-[34rem]"
+              src="/hero-person.png"
+              alt="Woman looking up with Eve Research eye logo overlay"
+              className="w-80 max-w-full rounded-2xl object-cover sm:w-96 md:w-[30rem]"
             />
           </div>
         </div>
