@@ -1,36 +1,56 @@
 import { google } from "googleapis";
-import { isGoogleCalendarConfigured } from "./config";
+import { getSetting } from "./settings";
 
 /**
- * Google Calendar write-back via a service account. When configured, each
- * booking becomes an event on Lauren's calendar (GOOGLE_CALENDAR_ID), so she
- * sees who's coming. Degrades gracefully: if not configured, these are no-ops
- * and booking still works (the app's own Calendar page always has the truth).
+ * Google Calendar write-back via a service account. Credentials can be entered
+ * in the app (Calendar page -> stored in app_settings) or via env vars. When
+ * configured, each booking becomes an event on Lauren's calendar, and her
+ * free/busy is used so we only offer times she's actually free. Degrades to
+ * no-ops when unconfigured, so booking still works.
  */
 
-function credentials(): { email: string; key: string } {
-  // Preferred: the whole service-account JSON pasted into one env var. Parsing
-  // it yields a private_key with real newlines already.
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (raw) {
-    const json = JSON.parse(raw) as {
-      client_email?: string;
-      private_key?: string;
-    };
-    return { email: json.client_email ?? "", key: json.private_key ?? "" };
-  }
-  // Fallback: separate vars (key stored with literal "\n").
-  return {
-    email: process.env.GOOGLE_CLIENT_EMAIL ?? "",
-    key: (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
-  };
+interface Creds {
+  email: string;
+  key: string;
+  calendarId: string;
 }
 
-function calendarClient() {
-  const { email, key } = credentials();
+/** Load credentials from app settings first, then env vars. */
+async function loadCreds(): Promise<Creds | null> {
+  const jsonRaw =
+    (await getSetting("google_service_account_json")) ||
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
+    "";
+  const calendarId =
+    (await getSetting("google_calendar_id")) ||
+    process.env.GOOGLE_CALENDAR_ID ||
+    "";
+  if (!calendarId) return null;
+
+  if (jsonRaw) {
+    try {
+      const json = JSON.parse(jsonRaw) as {
+        client_email?: string;
+        private_key?: string;
+      };
+      if (json.client_email && json.private_key) {
+        return { email: json.client_email, key: json.private_key, calendarId };
+      }
+    } catch {
+      return null;
+    }
+  }
+  // Fallback: separate env vars (key stored with literal "\n").
+  const email = process.env.GOOGLE_CLIENT_EMAIL;
+  const key = (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n");
+  if (email && key) return { email, key, calendarId };
+  return null;
+}
+
+function calendarClient(creds: Creds) {
   const auth = new google.auth.JWT({
-    email,
-    key,
+    email: creds.email,
+    key: creds.key,
     scopes: ["https://www.googleapis.com/auth/calendar"],
   });
   return google.calendar({ version: "v3", auth });
@@ -48,11 +68,12 @@ export interface CalendarEventInput {
 export async function createCalendarEvent(
   input: CalendarEventInput
 ): Promise<string | null> {
-  if (!isGoogleCalendarConfigured) return null;
+  const creds = await loadCreds();
+  if (!creds) return null;
   try {
-    const calendar = calendarClient();
+    const calendar = calendarClient(creds);
     const res = await calendar.events.insert({
-      calendarId: process.env.GOOGLE_CALENDAR_ID!,
+      calendarId: creds.calendarId,
       requestBody: {
         summary: input.summary,
         description: input.description,
@@ -68,26 +89,25 @@ export async function createCalendarEvent(
 }
 
 /**
- * Lauren's busy intervals from her calendar (free/busy). Used to ensure we only
- * offer times when Lauren is actually free, on top of Lisa's availability
- * blocks. Returns [] if unconfigured or on error (so booking still works).
+ * Lauren's busy intervals (free/busy). Used so we only offer times she's free.
+ * Returns [] if unconfigured or on error.
  */
 export async function getLaurenBusy(
   timeMinIso: string,
   timeMaxIso: string
 ): Promise<{ starts_at: string; ends_at: string }[]> {
-  if (!isGoogleCalendarConfigured) return [];
+  const creds = await loadCreds();
+  if (!creds) return [];
   try {
-    const calendar = calendarClient();
-    const calId = process.env.GOOGLE_CALENDAR_ID!;
+    const calendar = calendarClient(creds);
     const res = await calendar.freebusy.query({
       requestBody: {
         timeMin: timeMinIso,
         timeMax: timeMaxIso,
-        items: [{ id: calId }],
+        items: [{ id: creds.calendarId }],
       },
     });
-    const busy = res.data.calendars?.[calId]?.busy ?? [];
+    const busy = res.data.calendars?.[creds.calendarId]?.busy ?? [];
     return busy
       .filter((b) => b.start && b.end)
       .map((b) => ({ starts_at: b.start!, ends_at: b.end! }));
@@ -98,13 +118,12 @@ export async function getLaurenBusy(
 
 /** Delete a previously-created event. No-op if unconfigured or already gone. */
 export async function deleteCalendarEvent(eventId: string): Promise<void> {
-  if (!isGoogleCalendarConfigured || !eventId) return;
+  if (!eventId) return;
+  const creds = await loadCreds();
+  if (!creds) return;
   try {
-    const calendar = calendarClient();
-    await calendar.events.delete({
-      calendarId: process.env.GOOGLE_CALENDAR_ID!,
-      eventId,
-    });
+    const calendar = calendarClient(creds);
+    await calendar.events.delete({ calendarId: creds.calendarId, eventId });
   } catch {
     // Ignore (already deleted, or transient).
   }

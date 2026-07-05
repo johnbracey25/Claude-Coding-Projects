@@ -57,6 +57,18 @@ export async function syncNow() {
   revalidatePath("/calendar");
 }
 
+/**
+ * Save the Google service-account credentials for booking write-back. The JSON
+ * key is only updated when a new one is pasted (so it isn't cleared on save).
+ */
+export async function saveGoogleSettings(formData: FormData) {
+  const json = String(formData.get("google_service_account_json") ?? "").trim();
+  const calendarId = String(formData.get("google_calendar_id") ?? "").trim();
+  if (json) await setSetting("google_service_account_json", json);
+  await setSetting("google_calendar_id", calendarId);
+  revalidatePath("/calendar");
+}
+
 export async function cancelAppointment(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
