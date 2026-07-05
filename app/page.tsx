@@ -127,7 +127,7 @@ export default function Home() {
             <img
               src="/eve-icon.png"
               alt="Eve Research eye logo"
-              className="w-72 max-w-full object-contain sm:w-80 md:w-[28rem]"
+              className="w-80 max-w-full object-contain sm:w-96 md:w-[34rem]"
             />
           </div>
         </div>
