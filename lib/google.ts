@@ -67,6 +67,35 @@ export async function createCalendarEvent(
   }
 }
 
+/**
+ * Lauren's busy intervals from her calendar (free/busy). Used to ensure we only
+ * offer times when Lauren is actually free, on top of Lisa's availability
+ * blocks. Returns [] if unconfigured or on error (so booking still works).
+ */
+export async function getLaurenBusy(
+  timeMinIso: string,
+  timeMaxIso: string
+): Promise<{ starts_at: string; ends_at: string }[]> {
+  if (!isGoogleCalendarConfigured) return [];
+  try {
+    const calendar = calendarClient();
+    const calId = process.env.GOOGLE_CALENDAR_ID!;
+    const res = await calendar.freebusy.query({
+      requestBody: {
+        timeMin: timeMinIso,
+        timeMax: timeMaxIso,
+        items: [{ id: calId }],
+      },
+    });
+    const busy = res.data.calendars?.[calId]?.busy ?? [];
+    return busy
+      .filter((b) => b.start && b.end)
+      .map((b) => ({ starts_at: b.start!, ends_at: b.end! }));
+  } catch {
+    return [];
+  }
+}
+
 /** Delete a previously-created event. No-op if unconfigured or already gone. */
 export async function deleteCalendarEvent(eventId: string): Promise<void> {
   if (!isGoogleCalendarConfigured || !eventId) return;

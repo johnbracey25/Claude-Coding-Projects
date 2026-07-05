@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/config";
 import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
-import { createCalendarEvent } from "@/lib/google";
+import { createCalendarEvent, getLaurenBusy } from "@/lib/google";
 import { bookingConfirmation } from "@/lib/templates";
 import { formatDateTime } from "@/lib/format";
 import type { TimeRange } from "@/lib/scheduling";
@@ -79,7 +79,16 @@ export async function POST(req: NextRequest) {
   ]);
   const wins = (windows ?? []) as TimeRange[];
   const bufMs = Math.max(0, study.buffer_min ?? 0) * 60_000;
-  const busy = ((appts ?? []) as TimeRange[]).map((b) => ({
+
+  // Lauren must also be free at the chosen times.
+  const minStart = Math.min(...intervals.map((i) => i.start));
+  const maxEnd = Math.max(...intervals.map((i) => i.end));
+  const laurenBusy = await getLaurenBusy(
+    new Date(minStart).toISOString(),
+    new Date(maxEnd).toISOString()
+  );
+
+  const busy = [...((appts ?? []) as TimeRange[]), ...laurenBusy].map((b) => ({
     s: new Date(b.starts_at).getTime() - bufMs,
     e: new Date(b.ends_at).getTime() + bufMs,
   }));

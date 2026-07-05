@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/config";
 import { computeSlots, gapRange, type TimeRange } from "@/lib/scheduling";
 import { easternDateStartUtc, easternDateEndUtc } from "@/lib/timezone";
+import { getLaurenBusy } from "@/lib/google";
 import type { Study } from "@/lib/types";
 
 /**
@@ -78,9 +79,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Lauren must also be free: subtract her busy times (from her Google calendar)
+  // on top of Lisa's availability windows and existing app bookings.
+  const busyMin = (rangeStart ?? new Date()).toISOString();
+  const busyMax = (
+    rangeEnd ?? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+  ).toISOString();
+  const laurenBusy = await getLaurenBusy(busyMin, busyMax);
+
   const slots = computeSlots({
     windows: (windows ?? []) as TimeRange[],
-    busy: (appts ?? []) as TimeRange[],
+    busy: [...((appts ?? []) as TimeRange[]), ...laurenBusy],
     durationMin: visit.duration_min,
     stepMin: 30,
     bufferMin: study.buffer_min ?? 0,
