@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/config";
 import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
+import { createCalendarEvent } from "@/lib/google";
 import { bookingConfirmation } from "@/lib/templates";
 import { formatDateTime } from "@/lib/format";
 import type { TimeRange } from "@/lib/scheduling";
@@ -77,9 +78,10 @@ export async function POST(req: NextRequest) {
       .gte("ends_at", nowIso),
   ]);
   const wins = (windows ?? []) as TimeRange[];
+  const bufMs = Math.max(0, study.buffer_min ?? 0) * 60_000;
   const busy = ((appts ?? []) as TimeRange[]).map((b) => ({
-    s: new Date(b.starts_at).getTime(),
-    e: new Date(b.ends_at).getTime(),
+    s: new Date(b.starts_at).getTime() - bufMs,
+    e: new Date(b.ends_at).getTime() + bufMs,
   }));
 
   // Each selection must sit inside an availability window and not conflict with
@@ -125,7 +127,10 @@ export async function POST(req: NextRequest) {
     status: "scheduled",
   }));
 
-  const { error: insErr } = await supabase.from("appointments").insert(rows);
+  const { data: inserted, error: insErr } = await supabase
+    .from("appointments")
+    .insert(rows)
+    .select("id, visit_name, starts_at, ends_at, location");
   if (insErr) {
     return NextResponse.json({ error: "Could not save booking." }, { status: 500 });
   }
@@ -134,6 +139,27 @@ export async function POST(req: NextRequest) {
     .from("candidates")
     .update({ status: "booked" })
     .eq("id", cand.id);
+
+  // Mirror each visit onto Lauren's Google Calendar (no-op if not configured).
+  const who = `${person.first_name} ${person.last_name}`.trim() || "Participant";
+  for (const appt of inserted ?? []) {
+    const eventId = await createCalendarEvent({
+      summary: `${study.name}: ${who}`,
+      description:
+        `${appt.visit_name ?? "Visit"} for ${who}` +
+        (person.phone ? `\nPhone: ${person.phone}` : "") +
+        (person.email ? `\nEmail: ${person.email}` : ""),
+      location: study.address ?? study.location ?? undefined,
+      startIso: appt.starts_at,
+      endIso: appt.ends_at,
+    });
+    if (eventId) {
+      await supabase
+        .from("appointments")
+        .update({ google_event_id: eventId })
+        .eq("id", appt.id);
+    }
+  }
 
   // Confirmation (best-effort; skipped if messaging not configured).
   const visitLines = rows.map(

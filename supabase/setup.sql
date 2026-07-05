@@ -88,6 +88,8 @@ create table if not exists studies (
   compensation      text,
   address           text,
   prep_instructions text,
+  buffer_min        int not null default 0,
+  min_lead_hours    int not null default 0,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );

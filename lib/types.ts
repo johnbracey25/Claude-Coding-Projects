@@ -59,6 +59,8 @@ export interface Study {
   compensation: string | null;
   address: string | null;
   prep_instructions: string | null;
+  buffer_min: number;
+  min_lead_hours: number;
   created_at: string;
   updated_at: string;
 }

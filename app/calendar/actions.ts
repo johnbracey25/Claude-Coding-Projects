@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { easternToUtcIso } from "@/lib/timezone";
 import { setSetting } from "@/lib/settings";
 import { syncFromIcal } from "@/lib/calendar-sync";
+import { deleteCalendarEvent } from "@/lib/google";
 
 /**
  * Turn a datetime-local value ("2026-07-10T09:00"), entered in US Eastern, into
@@ -60,9 +61,15 @@ export async function cancelAppointment(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const supabase = createClient();
-  await supabase
+  const { data: appt } = await supabase
     .from("appointments")
     .update({ status: "cancelled" })
-    .eq("id", id);
+    .eq("id", id)
+    .select("google_event_id")
+    .single();
+  // Remove the mirrored event from Lauren's Google Calendar, if any.
+  if (appt?.google_event_id) {
+    await deleteCalendarEvent(appt.google_event_id);
+  }
   revalidatePath("/calendar");
 }

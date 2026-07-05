@@ -41,6 +41,8 @@ export async function saveStudy(formData: FormData) {
     compensation: str(formData.get("compensation")),
     address: str(formData.get("address")),
     prep_instructions: str(formData.get("prep_instructions")),
+    buffer_min: Number(formData.get("buffer_min") ?? 0) || 0,
+    min_lead_hours: Number(formData.get("min_lead_hours") ?? 0) || 0,
     eligibility_rules,
     visit_plan,
   };
