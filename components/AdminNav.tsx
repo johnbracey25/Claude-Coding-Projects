@@ -12,9 +12,18 @@ const LINKS = [
 export default function AdminNav() {
   return (
     <header className="border-b border-slate-200 bg-white">
-      <nav className="mx-auto flex max-w-5xl items-center gap-1 px-4">
-        <Link href="/dashboard" className="mr-4 py-3 font-semibold text-brand-dark">
-          Eve Research
+      <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-1 px-4">
+        <Link
+          href="/dashboard"
+          className="mr-3 flex items-center gap-2 py-2 font-semibold text-brand-dark"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/eve-research-logo.png"
+            alt="Eve Research"
+            className="h-8 w-8 rounded object-contain"
+          />
+          <span className="hidden sm:inline">Eve Research</span>
         </Link>
         {LINKS.map((l) => (
           <Link
@@ -25,14 +34,22 @@ export default function AdminNav() {
             {l.label}
           </Link>
         ))}
-        <form action={signOut} className="ml-auto">
-          <button
-            type="submit"
+        <div className="ml-auto flex items-center gap-1">
+          <Link
+            href="/"
             className="rounded px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900"
           >
-            Sign out
-          </button>
-        </form>
+            Home ↗
+          </Link>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="rounded px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </nav>
     </header>
   );
