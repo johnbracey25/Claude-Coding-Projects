@@ -82,10 +82,10 @@ export default function StudyForm({ study }: { study?: Study }) {
     all: rules.map((r) => {
       const c = criterion(r.field);
       let value: unknown = r.value;
-      if (c.valueInput === "age_range") {
+      if (c.valueInput === "age_range" || c.valueInput === "rx_range") {
         value =
           r.op === "between"
-            ? [Number(r.value || 0), Number(r.value2 || 200)]
+            ? [Number(r.value || 0), Number(r.value2 || 0)]
             : Number(r.value || 0);
       } else if (c.valueInput === "boolean") {
         value = r.value === "yes";
@@ -174,16 +174,36 @@ export default function StudyForm({ study }: { study?: Study }) {
                 </select>
 
                 {/* Value input depends on criterion type */}
-                {c.valueInput === "age_range" && r.op === "between" && (
-                  <span className="flex items-center gap-1">
-                    <input type="number" value={r.value} onChange={(e) => updateRule(i, { value: e.target.value })} className={`w-20 ${inputCls}`} />
-                    <span className="text-slate-400">and</span>
-                    <input type="number" value={r.value2} onChange={(e) => updateRule(i, { value2: e.target.value })} className={`w-20 ${inputCls}`} />
-                  </span>
-                )}
-                {c.valueInput === "age_range" && r.op !== "between" && (
-                  <input type="number" value={r.value} onChange={(e) => updateRule(i, { value: e.target.value })} className={`w-24 ${inputCls}`} />
-                )}
+                {(c.valueInput === "age_range" || c.valueInput === "rx_range") &&
+                  r.op === "between" && (
+                    <span className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        step={c.valueInput === "rx_range" ? "0.25" : "1"}
+                        value={r.value}
+                        onChange={(e) => updateRule(i, { value: e.target.value })}
+                        className={`w-24 ${inputCls}`}
+                      />
+                      <span className="text-slate-400">and</span>
+                      <input
+                        type="number"
+                        step={c.valueInput === "rx_range" ? "0.25" : "1"}
+                        value={r.value2}
+                        onChange={(e) => updateRule(i, { value2: e.target.value })}
+                        className={`w-24 ${inputCls}`}
+                      />
+                    </span>
+                  )}
+                {(c.valueInput === "age_range" || c.valueInput === "rx_range") &&
+                  r.op !== "between" && (
+                    <input
+                      type="number"
+                      step={c.valueInput === "rx_range" ? "0.25" : "1"}
+                      value={r.value}
+                      onChange={(e) => updateRule(i, { value: e.target.value })}
+                      className={`w-24 ${inputCls}`}
+                    />
+                  )}
                 {c.valueInput === "boolean" && (
                   <select value={r.value} onChange={(e) => updateRule(i, { value: e.target.value })} className={inputCls}>
                     <option value="yes">Yes</option>

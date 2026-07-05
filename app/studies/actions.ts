@@ -184,10 +184,21 @@ export async function setCandidateStatus(formData: FormData) {
   const status = String(formData.get("status") ?? "");
   if (!candidateId || !status) return;
   const supabase = createClient();
-  const { error } = await supabase
+  const { data: cand, error } = await supabase
     .from("candidates")
     .update({ status })
-    .eq("id", candidateId);
+    .eq("id", candidateId)
+    .select("person_id")
+    .single();
   if (error) throw new Error(error.message);
+
+  // Completing a study makes them a repeat participant for future matching.
+  if (status === "completed" && cand?.person_id) {
+    await supabase
+      .from("people")
+      .update({ is_repeat_participant: true })
+      .eq("id", cand.person_id);
+  }
+
   revalidatePath(`/studies/${studyId}`);
 }

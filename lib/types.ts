@@ -20,6 +20,7 @@ export interface Person {
   last_screened_at: string | null;
   consent_to_contact: boolean;
   signed_up_at: string | null;
+  is_repeat_participant: boolean;
   created_at: string;
   updated_at: string;
 }
