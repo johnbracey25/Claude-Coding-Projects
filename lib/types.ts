@@ -84,6 +84,32 @@ export interface Candidate {
   response: string | null;
 }
 
+export interface AvailabilityWindow {
+  id: string;
+  label: string | null;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  source: "manual" | "google";
+  google_event_id: string | null;
+  created_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  candidate_id: string | null;
+  person_id: string | null;
+  study_id: string | null;
+  visit_number: number;
+  visit_name: string | null;
+  starts_at: string;
+  ends_at: string;
+  status: "scheduled" | "completed" | "cancelled" | "no_show";
+  location: string | null;
+  google_event_id: string | null;
+  created_at: string;
+}
+
 export interface Message {
   id: string;
   person_id: string | null;

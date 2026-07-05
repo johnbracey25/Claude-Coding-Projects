@@ -30,6 +30,6 @@ See [`CLAUDE.md`](./CLAUDE.md) for architecture and conventions.
 - [x] Staff login + route protection (Supabase Auth)
 - [x] Phase 2 — Studies + eligibility rules + candidate matching
 - [x] Phase 3 — Messaging (email + SMS invites, responses, opt-out)
-- [ ] Phase 4 — Google Calendar sync
-- [ ] Phase 5 — Self-booking with multi-visit rules
+- [x] Phase 5 — Self-booking with multi-visit gap rules (manual availability)
+- [ ] Phase 4 — Google Calendar sync (feeds availability automatically)
 - [ ] Phase 6 — Reminders, dashboards, polish

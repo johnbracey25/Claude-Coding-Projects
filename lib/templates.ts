@@ -56,3 +56,28 @@ export function inviteSms(
     `Interested? ${link} (Reply STOP to opt out)`
   );
 }
+
+export function bookingConfirmation(
+  person: Person,
+  study: Study,
+  visitLines: string[]
+): { subject: string; html: string; text: string; sms: string } {
+  const subject = `Your ${study.name} visit is booked`;
+  const listText = visitLines.map((l) => `  - ${l}`).join("\n");
+  const listHtml = visitLines.map((l) => `<li>${l}</li>`).join("");
+  const where = study.location ? `\nLocation: ${study.location}` : "";
+  const text =
+    `Hi ${firstName(person)},\n\nYou're booked for "${study.name}". Here are your visit times:\n` +
+    `${listText}${where}\n\nThank you,\nEve Research`;
+  const html =
+    `<p>Hi ${firstName(person)},</p>` +
+    `<p>You're booked for <strong>${study.name}</strong>. Your visit times:</p>` +
+    `<ul>${listHtml}</ul>` +
+    (study.location ? `<p>Location: ${study.location}</p>` : "") +
+    `<p>Thank you,<br/>Eve Research</p>`;
+  const sms =
+    `Eve Research: you're booked for "${study.name}". ` +
+    visitLines.join("; ") +
+    (study.location ? ` at ${study.location}` : "");
+  return { subject, html, text, sms };
+}
