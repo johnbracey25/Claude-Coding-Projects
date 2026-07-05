@@ -1,16 +1,12 @@
 import Link from "next/link";
+import EveLogo from "./EveLogo";
 
 export default function PublicHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-[#f6f4ee]/85 backdrop-blur">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-3">
         <Link href="/" className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/eve-research-logo.png"
-            alt="Eve Research"
-            className="h-10 w-10 rounded-lg object-contain"
-          />
+          <EveLogo size="sm" className="h-10 w-14" />
           <span className="font-serif text-lg font-semibold tracking-tight text-brand-dark">
             Eve Research
           </span>
