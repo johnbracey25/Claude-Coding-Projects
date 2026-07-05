@@ -18,9 +18,16 @@ export interface SyncResult {
 }
 
 export async function syncFromIcal(): Promise<SyncResult> {
-  const url = await getSetting("ical_url");
+  // URL/keyword can come from app settings or a Vercel env var (ICAL_URL).
+  const url = (await getSetting("ical_url")) || process.env.ICAL_URL || "";
   if (!url) return { ok: false, imported: 0, error: "No iCal URL configured." };
-  const keyword = (await getSetting("ical_keyword"))?.trim().toLowerCase() || "";
+  const keyword = (
+    (await getSetting("ical_keyword")) ||
+    process.env.ICAL_KEYWORD ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
 
   let text: string;
   try {

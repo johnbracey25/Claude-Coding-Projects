@@ -3,14 +3,10 @@ import SetupNotice from "@/components/SetupNotice";
 import { isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/format";
-import { getSetting } from "@/lib/settings";
 import {
   addAvailabilityWindow,
   deleteAvailabilityWindow,
   cancelAppointment,
-  saveIcalSettings,
-  syncNow,
-  saveGoogleSettings,
 } from "./actions";
 import type { AvailabilityWindow, Appointment } from "@/lib/types";
 
@@ -39,18 +35,6 @@ export default async function CalendarPage() {
   const supabase = createClient();
   const nowIso = new Date().toISOString();
 
-  const [icalUrl, icalKeyword, lastSync, googleKey, googleCalId] =
-    await Promise.all([
-      getSetting("ical_url"),
-      getSetting("ical_keyword"),
-      getSetting("ical_last_sync"),
-      getSetting("google_service_account_json"),
-      getSetting("google_calendar_id"),
-    ]);
-  const googleKeySaved =
-    !!googleKey || !!process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  const googleConnected = googleKeySaved && !!(googleCalId || process.env.GOOGLE_CALENDAR_ID);
-
   const [{ data: windows }, { data: appts }] = await Promise.all([
     supabase
       .from("availability_windows")
@@ -77,110 +61,6 @@ export default async function CalendarPage() {
           Availability windows are the open blocks participants can book into. All
           times are US Eastern.
         </p>
-
-        {/* Google Calendar (iCal) sync */}
-        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-slate-600">
-            Availability calendar sync (read-only)
-          </h2>
-          <p className="mt-1 text-xs text-slate-500">
-            Paste the &quot;secret address in iCal format&quot; for the calendar
-            that holds your open availability blocks (Lisa&apos;s). Those events
-            become bookable windows and refresh automatically each day. Times when
-            Lauren is busy are removed automatically. Optionally filter to only
-            events whose title contains a keyword.
-          </p>
-          <form action={saveIcalSettings} className="mt-3 space-y-2">
-            <input
-              name="ical_url"
-              type="url"
-              defaultValue={icalUrl ?? ""}
-              placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
-              className={`w-full ${inputCls}`}
-            />
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                name="ical_keyword"
-                defaultValue={icalKeyword ?? ""}
-                placeholder="Keyword filter (optional, e.g. OPEN)"
-                className={inputCls}
-              />
-              <button
-                type="submit"
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
-              >
-                Save
-              </button>
-            </div>
-          </form>
-          <form action={syncNow} className="mt-3 flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={!icalUrl}
-              className="rounded-lg border border-brand px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-light/20 disabled:opacity-50"
-            >
-              Sync now
-            </button>
-            <span className="text-xs text-slate-400">
-              {lastSync
-                ? `Last synced ${formatDateTime(lastSync)}`
-                : "Not synced yet"}
-            </span>
-          </form>
-        </section>
-
-        {/* Google Calendar write-back (Lauren's calendar) */}
-        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-600">
-              Booking write-back (Lauren&apos;s Google Calendar)
-            </h2>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
-                googleConnected
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-amber-100 text-amber-700"
-              }`}
-            >
-              {googleConnected ? "Connected" : "Not connected"}
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-slate-500">
-            Paste the service-account JSON key and Lauren&apos;s calendar ID.
-            Bookings will appear on her Google Calendar automatically. (You still
-            need to share her calendar with the service account once, in Google
-            Calendar on the web.)
-          </p>
-          <form action={saveGoogleSettings} className="mt-3 space-y-2">
-            <input
-              name="google_calendar_id"
-              defaultValue={googleCalId ?? ""}
-              placeholder="Calendar ID (e.g. hackerlauren@gmail.com)"
-              className={`w-full ${inputCls}`}
-            />
-            <textarea
-              name="google_service_account_json"
-              rows={3}
-              placeholder={
-                googleKeySaved
-                  ? "A key is saved. Paste a new JSON key here only to replace it."
-                  : "Paste the entire service-account JSON key file here"
-              }
-              className={`w-full ${inputCls} font-mono text-xs`}
-            />
-            <div className="flex items-center gap-2">
-              <button
-                type="submit"
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
-              >
-                Save
-              </button>
-              {googleKeySaved && (
-                <span className="text-xs text-emerald-600">✓ Key saved</span>
-              )}
-            </div>
-          </form>
-        </section>
 
         {/* Add availability */}
         <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
