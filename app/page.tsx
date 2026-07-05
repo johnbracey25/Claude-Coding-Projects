@@ -1,43 +1,56 @@
 import Link from "next/link";
+import PublicHeader from "@/components/PublicHeader";
+import PublicFooter from "@/components/PublicFooter";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-8 px-6 text-center">
-      <div className="flex flex-col items-center">
+    <div className="flex min-h-screen flex-col bg-[#f6f4ee] text-slate-700">
+      <PublicHeader />
+
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-5 py-16 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/eve-research-logo.png"
           alt="Eve Research"
-          className="h-44 w-44 rounded-2xl object-contain"
+          className="h-44 w-44 rounded-2xl object-contain drop-shadow-sm"
         />
-        <p className="mt-3 text-lg text-slate-600">
-          Recruiting &amp; scheduling platform
-        </p>
-      </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Link
-          href="/join"
-          className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:bg-brand-dark"
-        >
-          Join a research study
-        </Link>
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-sage-dark">
+          Eye &amp; Vision Research · Athens, GA
+        </p>
+        <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-brand-dark sm:text-5xl">
+          Focused on Tomorrow&apos;s Vision
+        </h1>
+        <p className="mt-4 max-w-md text-lg leading-relaxed text-slate-600">
+          Eve Research connects people in the Athens community with local eye and
+          vision studies. Add your name and we&apos;ll reach out when a study fits
+          you. No obligation.
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/join"
+            className="rounded-lg bg-brand px-7 py-3 font-medium text-white transition hover:bg-brand-dark"
+          >
+            Join a research study
+          </Link>
+          <Link
+            href="/about"
+            className="rounded-lg border border-slate-300 bg-white px-7 py-3 font-medium text-slate-700 transition hover:border-brand hover:text-brand-dark"
+          >
+            Meet Dr. Hacker
+          </Link>
+        </div>
+
         <Link
           href="/dashboard"
-          className="rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-700 transition hover:bg-slate-50"
+          className="mt-8 text-sm text-slate-400 transition hover:text-brand-dark"
         >
           Staff sign in
         </Link>
-      </div>
+      </main>
 
-      <p className="max-w-md text-sm text-slate-400">
-        Interested in taking part in a study? Tap &ldquo;Join a research
-        study.&rdquo; Staff use the sign-in to manage people and scheduling.
-      </p>
-
-      <Link href="/about" className="text-sm text-brand-dark hover:underline">
-        About Dr. Lauren Hacker &amp; Eve Research
-      </Link>
-    </main>
+      <PublicFooter />
+    </div>
   );
 }
