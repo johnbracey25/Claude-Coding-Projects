@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
-import EveLogo from "@/components/EveLogo";
 
 export const metadata: Metadata = {
   title: "Eve Research | Eye & Vision Studies in Athens, GA",
@@ -50,9 +49,20 @@ export default function Home() {
       <PublicHeader />
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-5 py-16 text-center">
-        <EveLogo size="lg" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/eve-research-logo.png"
+          alt="Eve Research"
+          className="h-44 w-44 rounded-2xl object-contain drop-shadow-sm"
+        />
 
-        <p className="mt-6 max-w-md text-lg leading-relaxed text-slate-600">
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-sage-dark">
+          Eye &amp; Vision Research · Athens, GA
+        </p>
+        <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-brand-dark sm:text-5xl">
+          Focused on Tomorrow&apos;s Vision
+        </h1>
+        <p className="mt-4 max-w-md text-lg leading-relaxed text-slate-600">
           Eve Research connects people in the Athens community with local eye and
           vision studies. Add your name and we&apos;ll reach out when a study fits
           you. No obligation.
