@@ -34,10 +34,25 @@ async function loadCreds(): Promise<Creds | null> {
         private_key?: string;
       };
       if (json.client_email && json.private_key) {
-        return { email: json.client_email, key: json.private_key, calendarId };
+        const key = json.private_key.replace(/\\n/g, "\n");
+        return { email: json.client_email, key, calendarId };
       }
     } catch {
-      return null;
+      // Vercel can mangle JSON with real newlines — try fixing common issues.
+      try {
+        const fixed = jsonRaw.replace(/\n/g, "\\n");
+        const json = JSON.parse(fixed) as {
+          client_email?: string;
+          private_key?: string;
+        };
+        if (json.client_email && json.private_key) {
+          const key = json.private_key.replace(/\\n/g, "\n");
+          return { email: json.client_email, key, calendarId };
+        }
+      } catch {
+        console.error("[google] Could not parse service account JSON");
+        return null;
+      }
     }
   }
   // Fallback: separate env vars (key stored with literal "\n").
@@ -45,6 +60,51 @@ async function loadCreds(): Promise<Creds | null> {
   const key = (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n");
   if (email && key) return { email, key, calendarId };
   return null;
+}
+
+/** Check if Google Calendar is reachable. Returns a diagnostic object. */
+export async function testConnection(): Promise<{
+  configured: boolean;
+  calendarId?: string;
+  serviceAccount?: string;
+  canListEvents?: boolean;
+  error?: string;
+}> {
+  const creds = await loadCreds();
+  if (!creds)
+    return {
+      configured: false,
+      error: !process.env.GOOGLE_CALENDAR_ID
+        ? "GOOGLE_CALENDAR_ID env var not set"
+        : !process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+          ? "GOOGLE_SERVICE_ACCOUNT_JSON env var not set"
+          : "Could not parse service account credentials",
+    };
+  try {
+    const calendar = calendarClient(creds);
+    const now = new Date();
+    const later = new Date(now.getTime() + 24 * 60 * 60_000);
+    await calendar.events.list({
+      calendarId: creds.calendarId,
+      timeMin: now.toISOString(),
+      timeMax: later.toISOString(),
+      maxResults: 1,
+    });
+    return {
+      configured: true,
+      calendarId: creds.calendarId,
+      serviceAccount: creds.email,
+      canListEvents: true,
+    };
+  } catch (err) {
+    return {
+      configured: true,
+      calendarId: creds.calendarId,
+      serviceAccount: creds.email,
+      canListEvents: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
 }
 
 function calendarClient(creds: Creds) {
@@ -69,7 +129,10 @@ export async function createCalendarEvent(
   input: CalendarEventInput
 ): Promise<string | null> {
   const creds = await loadCreds();
-  if (!creds) return null;
+  if (!creds) {
+    console.warn("[google] createCalendarEvent skipped — no credentials loaded");
+    return null;
+  }
   try {
     const calendar = calendarClient(creds);
     const res = await calendar.events.insert({
@@ -83,7 +146,8 @@ export async function createCalendarEvent(
       },
     });
     return res.data.id ?? null;
-  } catch {
+  } catch (err) {
+    console.error("[google] createCalendarEvent failed:", err instanceof Error ? err.message : err);
     return null;
   }
 }
