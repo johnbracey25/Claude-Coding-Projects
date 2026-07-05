@@ -24,7 +24,8 @@ export default async function RespondPage({
   const study = data.study as unknown as Study;
 
   return (
-    <main className="mx-auto max-w-xl px-5 py-12">
+    <div className="min-h-screen bg-[#f6f4ee]">
+      <main className="mx-auto max-w-xl px-5 py-12">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-brand-dark">Eve Research</h1>
         <p className="mt-2 text-slate-600">You may qualify for a study</p>
@@ -58,6 +59,7 @@ export default async function RespondPage({
           <ResponseButtons token={data.token as string} />
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

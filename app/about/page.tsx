@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import PublicHeader from "@/components/PublicHeader";
+import PublicFooter from "@/components/PublicFooter";
 
 export const metadata: Metadata = {
   title: "About Eve Research & Dr. Lauren Hacker, O.D.",
@@ -7,112 +9,161 @@ export const metadata: Metadata = {
     "Meet Dr. Lauren Hacker, O.D., founder of Eve Research in Athens, Georgia, and learn how our eye and vision studies work.",
 };
 
+const CREDENTIALS = [
+  "Nova Southeastern O.D.",
+  "VA Residency Trained",
+  "15+ Years in Practice",
+  "Clinical Researcher",
+];
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sage-dark">
+      {children}
+    </p>
+  );
+}
+
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-2xl px-5 py-12">
-      <div className="text-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/eve-research-logo.png"
-          alt="Eve Research"
-          className="mx-auto h-32 w-32 rounded-2xl object-contain"
-        />
-      </div>
+    <div className="min-h-screen bg-[#f6f4ee] text-slate-700">
+      <PublicHeader />
 
-      <section className="mt-8">
-        <h1 className="text-2xl font-bold text-brand-dark">
-          Dr. Lauren Hacker, O.D.
-        </h1>
-        <p className="mt-1 text-sm font-medium text-sage-dark">
-          Doctor of Optometry · Founder of Eve Research · Athens, Georgia
-        </p>
+      <main className="mx-auto max-w-3xl px-5">
+        {/* Hero */}
+        <section className="pt-12 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/eve-research-logo.png"
+            alt="Eve Research"
+            className="mx-auto h-28 w-28 rounded-2xl object-contain shadow-sm ring-1 ring-black/5"
+          />
+          <div className="mt-5">
+            <Eyebrow>Meet the founder</Eyebrow>
+          </div>
+          <h1 className="mt-2 font-serif text-4xl font-bold tracking-tight text-brand-dark">
+            Dr. Lauren Hacker, O.D.
+          </h1>
+          <p className="mt-2 text-slate-600">
+            Doctor of Optometry · Founder of Eve Research · Athens, Georgia
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {CREDENTIALS.map((c) => (
+              <span
+                key={c}
+                className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-dark ring-1 ring-slate-200"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        </section>
 
-        <p className="mt-4 leading-relaxed text-slate-700">
-          Dr. Lauren Hacker is a Doctor of Optometry and the founder of Eve
-          Research in Athens, Georgia. She has cared for patients of all ages for
-          more than 15 years, and has spent much of her career at the leading
-          edge of vision research.
-        </p>
-        <p className="mt-3 leading-relaxed text-slate-700">
-          She earned her Doctor of Optometry degree from Nova Southeastern
-          University College of Optometry and completed a residency at the Dorn
-          Veterans Affairs Medical Center, focusing on ocular disease, low vision,
-          and specialty contact lens fittings. In private practice she provided
-          comprehensive eye care along with post-operative care using the latest
-          cataract and LASIK technologies. She is an active member of the American
-          Optometric Association and the Georgia Optometric Association, and holds
-          an active Georgia license and injections certification.
-        </p>
-      </section>
+        {/* Bio */}
+        <section className="mt-10 rounded-2xl bg-white p-7 shadow-sm ring-1 ring-slate-100">
+          <p className="leading-relaxed">
+            Dr. Lauren Hacker is a Doctor of Optometry and the founder of Eve
+            Research in Athens, Georgia. She has cared for patients of all ages for
+            more than 15 years, and has spent much of her career at the leading
+            edge of vision research.
+          </p>
+          <p className="mt-4 leading-relaxed">
+            She earned her Doctor of Optometry degree from Nova Southeastern
+            University College of Optometry and completed a residency at the Dorn
+            Veterans Affairs Medical Center, focusing on ocular disease, low
+            vision, and specialty contact lens fittings. In private practice she
+            provided comprehensive eye care along with post-operative care using
+            the latest cataract and LASIK technologies. She is an active member of
+            the American Optometric Association and the Georgia Optometric
+            Association, and holds an active Georgia license and injections
+            certification.
+          </p>
+        </section>
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold text-brand-dark">
-          Research that reaches everyday life
-        </h2>
-        <p className="mt-3 leading-relaxed text-slate-700">
-          Over the past decade, Dr. Hacker has helped run clinical studies for
-          leading eye-care companies, including Johnson &amp; Johnson and Alcon,
-          testing new contact lenses and lens implants.
-        </p>
-        <p className="mt-3 leading-relaxed text-slate-700">
-          One project she is especially proud of tested contact lenses that
-          automatically darken in bright light. Working alongside vision
-          scientists at the University of Georgia, the team measured how these
-          light-adapting lenses helped people see more comfortably and clearly in
-          intense glare, like bright sunlight. Research like this is how the
-          everyday products that make vision easier get proven safe and effective
-          before they ever reach you.
-        </p>
-      </section>
+        {/* Research highlight */}
+        <section className="mt-6 overflow-hidden rounded-2xl bg-brand p-7 text-white shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-light">
+            Research that reaches everyday life
+          </p>
+          <h2 className="mt-2 font-serif text-2xl font-semibold">
+            Lenses that adapt to the light around you
+          </h2>
+          <p className="mt-3 leading-relaxed text-slate-100">
+            Over the past decade, Dr. Hacker has helped run clinical studies for
+            leading eye-care companies, including Johnson &amp; Johnson and Alcon.
+            One project she is especially proud of tested contact lenses that
+            automatically darken in bright light. Working alongside vision
+            scientists at the University of Georgia, the team measured how these
+            light-adapting lenses helped people see more comfortably and clearly in
+            intense glare, like bright sunlight. Research like this is how the
+            everyday products that make vision easier get proven safe and effective
+            before they ever reach you.
+          </p>
+        </section>
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold text-brand-dark">
-          About Eve Research
-        </h2>
-        <p className="mt-3 leading-relaxed text-slate-700">
-          Eve Research, short for Emerging Vision Exploration, was founded by
-          Dr. Hacker in 2021. Its mission is simple: connect people in the
-          community with local eye and vision studies, and make taking part easy.
-        </p>
-        <ul className="mt-3 space-y-2 text-slate-700">
-          <li className="flex gap-2">
-            <span className="text-sage-dark">•</span>
-            We match you to studies you may qualify for, based on what you tell us.
-          </li>
-          <li className="flex gap-2">
-            <span className="text-sage-dark">•</span>
-            We invite you to take part with no obligation, and you can opt out
-            anytime.
-          </li>
-          <li className="flex gap-2">
-            <span className="text-sage-dark">•</span>
-            Signing up takes a minute. When a study fits you, we reach out and you
-            pick a time that works.
-          </li>
-        </ul>
-      </section>
+        {/* About Eve Research */}
+        <section className="mt-8">
+          <Eyebrow>About the practice</Eyebrow>
+          <h2 className="mt-2 font-serif text-2xl font-bold text-brand-dark">
+            About Eve Research
+          </h2>
+          <p className="mt-3 leading-relaxed">
+            <span className="font-semibold text-brand-dark">
+              <span className="text-sage-dark">E</span>ve
+            </span>{" "}
+            is short for{" "}
+            <span className="font-semibold text-brand-dark">
+              <span className="text-sage-dark">E</span>merging{" "}
+              <span className="text-sage-dark">V</span>ision{" "}
+              <span className="text-sage-dark">E</span>xploration
+            </span>
+            . Founded by Dr. Hacker in 2021, its mission is simple: connect people
+            in the community with local eye and vision studies, and make taking
+            part easy.
+          </p>
+          <ul className="mt-4 space-y-3">
+            {[
+              "We match you to studies you may qualify for, based on what you tell us.",
+              "We invite you to take part with no obligation, and you can opt out anytime.",
+              "Signing up takes a minute. When a study fits you, we reach out and you pick a time that works.",
+            ].map((t) => (
+              <li key={t} className="flex gap-3">
+                <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-sage/25 text-xs font-bold text-sage-dark">
+                  ✓
+                </span>
+                <span className="leading-relaxed">{t}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section className="mt-8 rounded-xl bg-slate-50 p-4">
-        <p className="leading-relaxed text-slate-700">
-          Dr. Hacker has called Athens, Georgia home for 20 years. She is married
-          to John Bracey and mom to their daughter, Ivey Jane.
-        </p>
-      </section>
+        {/* Personal */}
+        <section className="mt-8 rounded-2xl bg-sage/10 p-6 ring-1 ring-sage/20">
+          <p className="leading-relaxed text-slate-700">
+            Beyond the clinic, Dr. Hacker has called Athens, Georgia home for 20
+            years. She is married to John Bracey and mom to their daughter, Ivey
+            Jane.
+          </p>
+        </section>
 
-      <div className="mt-10 rounded-xl border border-slate-200 bg-white p-5 text-center">
-        <p className="text-slate-700">Interested in taking part in a study?</p>
-        <Link
-          href="/join"
-          className="mt-3 inline-block rounded-lg bg-brand px-6 py-2.5 font-medium text-white hover:bg-brand-dark"
-        >
-          Join the research list
-        </Link>
-      </div>
+        {/* CTA */}
+        <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-8 text-center">
+          <h3 className="font-serif text-xl font-semibold text-brand-dark">
+            Interested in taking part in a study?
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Add your name to our list. It only takes a minute.
+          </p>
+          <Link
+            href="/join"
+            className="mt-4 inline-block rounded-lg bg-brand px-7 py-3 font-medium text-white transition hover:bg-brand-dark"
+          >
+            Join the research list
+          </Link>
+        </section>
+      </main>
 
-      <p className="mt-6 text-center text-xs text-slate-400">
-        Eve Research · Athens, Georgia · Your information is kept private and used
-        only to contact you about research opportunities.
-      </p>
-    </main>
+      <PublicFooter />
+    </div>
   );
 }

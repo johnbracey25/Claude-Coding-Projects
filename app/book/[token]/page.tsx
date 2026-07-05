@@ -29,28 +29,32 @@ export default async function BookPage({
   }));
 
   return (
-    <main className="mx-auto max-w-xl px-5 py-10">
-      <div className="text-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/eve-research-logo.png"
-          alt="Eve Research"
-          className="mx-auto h-24 w-24 rounded-2xl object-contain"
-        />
-        <h1 className="mt-3 text-xl font-bold text-slate-900">{study.name}</h1>
-        {study.location && (
-          <p className="mt-1 text-sm text-slate-500">{study.location}</p>
-        )}
-      </div>
+    <div className="min-h-screen bg-[#f6f4ee]">
+      <main className="mx-auto max-w-xl px-5 py-10">
+        <div className="text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/eve-research-logo.png"
+            alt="Eve Research"
+            className="mx-auto h-24 w-24 rounded-2xl object-contain shadow-sm ring-1 ring-black/5"
+          />
+          <h1 className="mt-3 font-serif text-2xl font-bold text-brand-dark">
+            {study.name}
+          </h1>
+          {study.location && (
+            <p className="mt-1 text-sm text-slate-500">{study.location}</p>
+          )}
+        </div>
 
-      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <BookingFlow
-          token={data.token as string}
-          visits={visits}
-          studyName={study.name}
-          location={study.location}
-        />
-      </div>
-    </main>
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <BookingFlow
+            token={data.token as string}
+            visits={visits}
+            studyName={study.name}
+            location={study.location}
+          />
+        </div>
+      </main>
+    </div>
   );
 }

@@ -1,42 +1,42 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import JoinForm from "@/components/JoinForm";
+import PublicHeader from "@/components/PublicHeader";
+import PublicFooter from "@/components/PublicFooter";
 
 export const metadata: Metadata = {
   title: "Join the Eve Research study list",
   description:
-    "Sign up to be considered for paid eye-research studies with Eve Research. It only takes a minute.",
+    "Sign up to be considered for local eye-research studies with Eve Research. It only takes a minute.",
 };
 
 export default function JoinPage() {
   return (
-    <main className="mx-auto max-w-xl px-5 py-10">
-      <div className="text-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/eve-research-logo.png"
-          alt="Eve Research"
-          className="mx-auto h-40 w-40 rounded-2xl object-contain"
-        />
-        <p className="mt-4 text-lg text-slate-700">
-          Interested in taking part in local eye-research studies?
-        </p>
-        <p className="mt-1 text-slate-500">
-          Add your name to our list. When a study comes up that fits you, we&apos;ll
-          reach out. No obligation.
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f6f4ee] text-slate-700">
+      <PublicHeader />
 
-      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <Suspense fallback={<p className="text-slate-400">Loading…</p>}>
-          <JoinForm />
-        </Suspense>
-      </div>
+      <main className="mx-auto max-w-xl px-5">
+        <section className="pt-10 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sage-dark">
+            Join the research list
+          </p>
+          <h1 className="mt-2 font-serif text-3xl font-bold tracking-tight text-brand-dark">
+            Take part in local eye-research studies
+          </h1>
+          <p className="mt-3 text-slate-600">
+            Add your name below. When a study comes up that fits you, we&apos;ll
+            reach out. No obligation.
+          </p>
+        </section>
 
-      <p className="mt-6 text-center text-xs text-slate-400">
-        Your information is kept private and used only to contact you about
-        research opportunities with Eve Research.
-      </p>
-    </main>
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <Suspense fallback={<p className="text-slate-400">Loading…</p>}>
+            <JoinForm />
+          </Suspense>
+        </div>
+      </main>
+
+      <PublicFooter />
+    </div>
   );
 }
