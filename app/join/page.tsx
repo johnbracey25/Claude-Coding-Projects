@@ -12,15 +12,18 @@ export default function JoinPage() {
   return (
     <main className="mx-auto max-w-xl px-5 py-10">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-brand-dark">
-          Eve Research
-        </h1>
-        <p className="mt-3 text-lg text-slate-700">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/eve-research-logo.png"
+          alt="Eve Research"
+          className="mx-auto h-40 w-40 rounded-2xl object-contain"
+        />
+        <p className="mt-4 text-lg text-slate-700">
           Interested in taking part in local eye-research studies?
         </p>
         <p className="mt-1 text-slate-500">
-          Add your name to our list. When a study comes up that fits you,
-          we&apos;ll reach out — no obligation.
+          Add your name to our list. When a study comes up that fits you, we&apos;ll
+          reach out. No obligation.
         </p>
       </div>
 

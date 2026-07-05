@@ -19,12 +19,13 @@ interface SignupBody {
   phone?: string;
   date_of_birth?: string;
   wears_contacts?: boolean;
-  had_cataract_surgery?: "yes" | "no" | "unsure" | "";
+  contact_rx?: { od?: string; os?: string } | null;
+  had_cataract_surgery?: "yes" | "no" | "";
   eye_conditions?: string[];
   notes?: string;
   consent?: boolean;
   source?: string;
-  /** Honeypot — must stay empty. Bots fill it. */
+  /** Honeypot: must stay empty. Bots fill it. */
   website?: string;
 }
 
@@ -80,6 +81,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Date of birth is required.
+  const dob = body.date_of_birth ? normalizeDate(body.date_of_birth) : null;
+  if (!dob) {
+    return NextResponse.json(
+      { error: "Please enter your date of birth." },
+      { status: 400 }
+    );
+  }
+
+  // Cataract surgery answer is required (must be yes or no).
+  if (body.had_cataract_surgery !== "yes" && body.had_cataract_surgery !== "no") {
+    return NextResponse.json(
+      { error: "Please tell us whether you've had cataract surgery." },
+      { status: 400 }
+    );
+  }
+
   const source =
     body.source && SOURCE_RE.test(body.source) ? body.source : "public_signup";
 
@@ -88,18 +106,22 @@ export async function POST(req: NextRequest) {
     : [];
   const tags = body.wears_contacts ? ["contact_lens_wearer"] : [];
 
+  // Structured contact-lens prescription (per eye), only when they wear contacts.
+  const rxOd = body.contact_rx?.od?.toString().slice(0, 12);
+  const rxOs = body.contact_rx?.os?.toString().slice(0, 12);
+  const contactRx =
+    body.wears_contacts && (rxOd || rxOs)
+      ? { od: rxOd ?? null, os: rxOs ?? null }
+      : null;
+
   const values: PersonInput = {
     first_name: first,
     last_name: last,
     email,
     phone,
-    date_of_birth: body.date_of_birth ? normalizeDate(body.date_of_birth) : null,
-    had_cataract_surgery:
-      body.had_cataract_surgery === "yes"
-        ? true
-        : body.had_cataract_surgery === "no"
-          ? false
-          : null,
+    date_of_birth: dob,
+    had_cataract_surgery: body.had_cataract_surgery === "yes",
+    contact_rx: contactRx,
     eye_conditions: eyeConditions,
     tags,
     notes: (body.notes ?? "").trim() || null,

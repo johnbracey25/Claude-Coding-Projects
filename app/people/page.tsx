@@ -96,8 +96,8 @@ export default async function PeoplePage({
                               : "(no name)"}
                           </Link>
                         </td>
-                        <td className="px-4 py-2 text-slate-600">{p.email ?? "—"}</td>
-                        <td className="px-4 py-2 text-slate-600">{p.phone ?? "—"}</td>
+                        <td className="px-4 py-2 text-slate-600">{p.email ?? "-"}</td>
+                        <td className="px-4 py-2 text-slate-600">{p.phone ?? "-"}</td>
                         <td className="px-4 py-2">
                           <StatusBadge status={p.status} />
                         </td>

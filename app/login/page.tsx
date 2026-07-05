@@ -10,9 +10,14 @@ export default function LoginPage({
 }) {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-brand-dark">Eve Research</h1>
-        <p className="mt-1 text-sm text-slate-500">Staff sign in</p>
+      <div className="flex flex-col items-center text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/eve-research-logo.png"
+          alt="Eve Research"
+          className="h-28 w-28 rounded-2xl object-contain"
+        />
+        <p className="mt-2 text-sm text-slate-500">Staff sign in</p>
       </div>
 
       {!isSupabaseConfigured ? (

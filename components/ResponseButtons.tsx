@@ -31,7 +31,7 @@ export default function ResponseButtons({ token }: { token: string }) {
   if (done === "interested") {
     return (
       <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-5 text-center text-emerald-800">
-        <p className="font-semibold">Great — thank you! 🎉</p>
+        <p className="font-semibold">Great, thank you! 🎉</p>
         <p className="mt-1 text-sm">
           We&apos;ll be in touch soon with the next steps and available times.
         </p>
@@ -41,7 +41,7 @@ export default function ResponseButtons({ token }: { token: string }) {
   if (done === "declined") {
     return (
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-center text-slate-600">
-        <p>No problem — thanks for letting us know. We won&apos;t reach out about this study.</p>
+        <p>No problem. Thanks for letting us know, we won&apos;t reach out about this study.</p>
       </div>
     );
   }

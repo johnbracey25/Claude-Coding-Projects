@@ -104,7 +104,7 @@ export default function ImportPage() {
         </div>
         <p className="mt-1 text-slate-600">
           Upload a CSV export of your contacts. We&apos;ll match columns to fields,
-          let you adjust, then import — de-duplicating on email and phone.
+          let you adjust, then import, de-duplicating on email and phone.
         </p>
 
         <div className="mt-6">
@@ -184,7 +184,7 @@ export default function ImportPage() {
                             }
                             className="rounded border border-slate-300 px-2 py-1 text-sm"
                           >
-                            <option value="">— Ignore —</option>
+                            <option value="">Ignore</option>
                             {PERSON_FIELDS.map((f) => (
                               <option key={f.key} value={f.key}>
                                 {f.label}

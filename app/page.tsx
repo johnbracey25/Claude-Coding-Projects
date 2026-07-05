@@ -3,10 +3,13 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-8 px-6 text-center">
-      <div>
-        <h1 className="text-4xl font-bold tracking-tight text-brand-dark">
-          Eve Research
-        </h1>
+      <div className="flex flex-col items-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/eve-research-logo.png"
+          alt="Eve Research"
+          className="h-44 w-44 rounded-2xl object-contain"
+        />
         <p className="mt-3 text-lg text-slate-600">
           Recruiting &amp; scheduling platform
         </p>
