@@ -6,10 +6,10 @@
 
 export const APP_TZ = "America/New_York";
 
-/** Timezone offset (ms) for APP_TZ at a given UTC instant. */
-function tzOffsetMs(utcMs: number): number {
+/** Timezone offset (ms) for a given IANA tz at a given UTC instant. */
+function tzOffsetMs(utcMs: number, tz: string): number {
   const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone: APP_TZ,
+    timeZone: tz,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -32,6 +32,20 @@ function tzOffsetMs(utcMs: number): number {
   return asIfUtc - utcMs;
 }
 
+/** Convert a wall-clock time in a given IANA tz to a UTC ISO instant. */
+export function zonedToUtcIso(
+  y: number,
+  mo: number,
+  d: number,
+  hh: number,
+  mm: number,
+  tz: string
+): string {
+  const guess = Date.UTC(y, mo - 1, d, hh, mm);
+  const offset = tzOffsetMs(guess, tz);
+  return new Date(guess - offset).toISOString();
+}
+
 /**
  * Convert an Eastern wall-clock string ("YYYY-MM-DDTHH:mm" or with seconds) to a
  * UTC ISO instant, accounting for EST/EDT.
@@ -40,9 +54,7 @@ export function easternToUtcIso(local: string): string | null {
   const m = local.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
   if (!m) return null;
   const [, y, mo, d, hh, mm] = m.map(Number);
-  const guess = Date.UTC(y, mo - 1, d, hh, mm);
-  const offset = tzOffsetMs(guess);
-  return new Date(guess - offset).toISOString();
+  return zonedToUtcIso(y, mo, d, hh, mm, APP_TZ);
 }
 
 /** Start-of-day (00:00 Eastern) for a "YYYY-MM-DD" date, as UTC ISO. */

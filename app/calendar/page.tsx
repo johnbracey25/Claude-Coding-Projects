@@ -3,10 +3,13 @@ import SetupNotice from "@/components/SetupNotice";
 import { isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/format";
+import { getSetting } from "@/lib/settings";
 import {
   addAvailabilityWindow,
   deleteAvailabilityWindow,
   cancelAppointment,
+  saveIcalSettings,
+  syncNow,
 } from "./actions";
 import type { AvailabilityWindow, Appointment } from "@/lib/types";
 
@@ -35,6 +38,12 @@ export default async function CalendarPage() {
   const supabase = createClient();
   const nowIso = new Date().toISOString();
 
+  const [icalUrl, icalKeyword, lastSync] = await Promise.all([
+    getSetting("ical_url"),
+    getSetting("ical_keyword"),
+    getSetting("ical_last_sync"),
+  ]);
+
   const [{ data: windows }, { data: appts }] = await Promise.all([
     supabase
       .from("availability_windows")
@@ -58,8 +67,58 @@ export default async function CalendarPage() {
       <main className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="text-2xl font-bold text-slate-900">Calendar</h1>
         <p className="mt-1 text-slate-600">
-          Availability windows are the open blocks participants can book into.
+          Availability windows are the open blocks participants can book into. All
+          times are US Eastern.
         </p>
+
+        {/* Google Calendar (iCal) sync */}
+        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-slate-600">
+            Google Calendar sync (read-only)
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Paste Lauren&apos;s calendar &quot;secret address in iCal format&quot;.
+            Her events become bookable windows and refresh automatically every
+            hour. Optionally filter to only events whose title contains a keyword.
+          </p>
+          <form action={saveIcalSettings} className="mt-3 space-y-2">
+            <input
+              name="ical_url"
+              type="url"
+              defaultValue={icalUrl ?? ""}
+              placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
+              className={`w-full ${inputCls}`}
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                name="ical_keyword"
+                defaultValue={icalKeyword ?? ""}
+                placeholder="Keyword filter (optional, e.g. OPEN)"
+                className={inputCls}
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+          <form action={syncNow} className="mt-3 flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={!icalUrl}
+              className="rounded-lg border border-brand px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-light/20 disabled:opacity-50"
+            >
+              Sync now
+            </button>
+            <span className="text-xs text-slate-400">
+              {lastSync
+                ? `Last synced ${formatDateTime(lastSync)}`
+                : "Not synced yet"}
+            </span>
+          </form>
+        </section>
 
         {/* Add availability */}
         <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
