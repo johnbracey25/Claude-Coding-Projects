@@ -4,9 +4,10 @@ import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "About Eve Research & Dr. Lauren Hacker, O.D.",
+  title: "About Dr. Lauren Hacker, O.D. & Eve Research",
   description:
-    "Meet Dr. Lauren Hacker, O.D., founder of Eve Research in Athens, Georgia, and learn how our eye and vision studies work.",
+    "Meet Dr. Lauren Hacker, O.D., optometrist and founder of Eve Research in Athens, Georgia. 15+ years of experience in eye care and clinical vision research with Johnson & Johnson and Alcon.",
+  alternates: { canonical: "https://eve-research.com/about" },
 };
 
 const CREDENTIALS = [

@@ -1,10 +1,51 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
+
+export const metadata: Metadata = {
+  title: "Eve Research | Eye & Vision Studies in Athens, GA",
+  alternates: { canonical: "https://eve-research.com" },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  name: "Eve Research",
+  alternateName: "Emerging Vision Exploration",
+  description:
+    "Eve Research connects people in the Athens, Georgia community with local eye and vision research studies.",
+  url: "https://eve-research.com",
+  logo: "https://eve-research.com/eve-research-logo.png",
+  image: "https://eve-research.com/eve-research-logo.png",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Athens",
+    addressRegion: "GA",
+    addressCountry: "US",
+  },
+  founder: {
+    "@type": "Person",
+    name: "Dr. Lauren Hacker",
+    jobTitle: "Doctor of Optometry",
+    description:
+      "Optometrist with 15+ years of experience specializing in eye and vision clinical research.",
+  },
+  medicalSpecialty: "Optometry",
+  areaServed: {
+    "@type": "City",
+    name: "Athens",
+    containedInPlace: { "@type": "State", name: "Georgia" },
+  },
+};
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f6f4ee] text-slate-700">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PublicHeader />
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-5 py-16 text-center">

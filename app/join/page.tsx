@@ -5,9 +5,10 @@ import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "Join the Eve Research study list",
+  title: "Sign Up for Eye & Vision Studies in Athens, GA",
   description:
-    "Sign up to be considered for local eye-research studies with Eve Research. It only takes a minute.",
+    "Join the Eve Research participant list. We match you to local eye and vision studies you may qualify for. Sign up takes a minute, no obligation.",
+  alternates: { canonical: "https://eve-research.com/join" },
 };
 
 export default function JoinPage() {
