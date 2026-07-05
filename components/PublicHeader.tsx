@@ -7,10 +7,18 @@ export default function PublicHeader() {
         <Link href="/" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/eve-research-logo.png"
-            alt="Eve Research"
-            className="h-12 w-auto object-contain"
+            src="/eve-icon.png"
+            alt=""
+            className="h-9 w-9 object-contain"
           />
+          <div className="flex flex-col leading-none">
+            <span className="font-serif text-xl font-bold tracking-tight text-brand-dark">
+              Eve
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sage-dark">
+              Research
+            </span>
+          </div>
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
