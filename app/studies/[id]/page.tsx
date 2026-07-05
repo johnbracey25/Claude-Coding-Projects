@@ -201,6 +201,14 @@ function CandidateRow({
         <Link href={`/people/${p.id}`} className="font-medium text-brand-dark hover:underline">
           {name}
         </Link>
+        <a
+          href={`/r/${candidate.token}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-0.5 block text-xs text-slate-400 hover:text-brand-dark hover:underline"
+        >
+          participant link ↗
+        </a>
       </td>
       <td className="px-4 py-2 text-slate-600">
         {p.email ?? p.phone ?? "-"}
