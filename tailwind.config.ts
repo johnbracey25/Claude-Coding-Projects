@@ -8,10 +8,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Pulled from the Eve Research logo: deep navy + sage green.
         brand: {
-          DEFAULT: "#0f766e",
-          dark: "#115e59",
-          light: "#5eead4",
+          DEFAULT: "#1f3d57",
+          dark: "#152b3e",
+          light: "#90a687",
+        },
+        sage: {
+          DEFAULT: "#90a687",
+          dark: "#6f8767",
         },
       },
     },

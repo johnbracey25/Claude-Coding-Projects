@@ -92,7 +92,7 @@ export default async function StudyDetailPage({
             <h2 className="text-sm font-semibold text-slate-600">Eligibility</h2>
             {rules.length === 0 ? (
               <p className="mt-2 text-sm text-slate-500">
-                No rules — everyone on your list qualifies.
+                No rules yet, so everyone on your list qualifies.
               </p>
             ) : (
               <ul className="mt-2 list-inside list-disc text-sm text-slate-700">
@@ -203,7 +203,7 @@ function CandidateRow({
         </Link>
       </td>
       <td className="px-4 py-2 text-slate-600">
-        {p.email ?? p.phone ?? "—"}
+        {p.email ?? p.phone ?? "-"}
       </td>
       <td className="px-4 py-2">
         <span className={`rounded-full px-2 py-0.5 text-xs ${CAND_STYLE[candidate.status]}`}>

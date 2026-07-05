@@ -40,7 +40,7 @@ export default function ShareSignupLink() {
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <h2 className="font-semibold text-slate-900">Share your signup link</h2>
       <p className="mt-1 text-sm text-slate-600">
-        Post this anywhere — Nextdoor, Facebook, flyers. People who sign up land
+        Post this anywhere: Nextdoor, Facebook, flyers. People who sign up land
         in your People list automatically.
       </p>
 
