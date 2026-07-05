@@ -1,6 +1,29 @@
 import { isEmailConfigured, isSmsConfigured } from "./config";
 
 /**
+ * Pick the channel to actually use for a person: prefer a channel that is BOTH
+ * permitted (has contact info + opt-in) AND configured. This means when only
+ * SMS is set up, someone who has an email but also a phone still gets a text,
+ * instead of the invite silently "skipping" on an unconfigured email.
+ */
+export function chooseChannel(opts: {
+  email?: string | null;
+  phone?: string | null;
+  emailOptIn: boolean;
+  smsOptIn: boolean;
+}): "email" | "sms" | null {
+  const wantEmail = !!opts.email && opts.emailOptIn;
+  const wantSms = !!opts.phone && opts.smsOptIn;
+  if (wantEmail && isEmailConfigured) return "email";
+  if (wantSms && isSmsConfigured) return "sms";
+  // Neither of their channels is configured yet — return one they have so the
+  // attempt is logged as "skipped" (visible to staff) rather than dropped.
+  if (wantEmail) return "email";
+  if (wantSms) return "sms";
+  return null;
+}
+
+/**
  * Email (Resend) + SMS (Twilio) senders, called over each provider's REST API
  * so we don't pull in heavy SDKs. Both degrade gracefully: if the provider
  * isn't configured yet, they return { ok: false, skipped: true } instead of
