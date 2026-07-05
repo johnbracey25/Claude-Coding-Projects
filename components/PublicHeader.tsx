@@ -2,31 +2,28 @@ import Link from "next/link";
 
 export default function PublicHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-[#f6f4ee]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-3">
-        <Link href="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-[#f6f4ee]/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
+        <Link href="/" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/eve-research-logo.png"
             alt="Eve Research"
-            className="h-9 w-9 rounded object-contain"
+            className="h-12 w-auto object-contain"
           />
-          <span className="font-serif text-lg font-semibold tracking-tight text-brand-dark">
-            Eve Research
-          </span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
             href="/about"
-            className="rounded-lg px-3 py-2 text-slate-600 transition hover:text-brand-dark"
+            className="rounded-lg px-3 py-2 font-medium uppercase tracking-wider text-slate-500 transition hover:text-brand-dark"
           >
             About
           </Link>
           <Link
             href="/join"
-            className="rounded-lg bg-brand px-4 py-2 font-medium text-white transition hover:bg-brand-dark"
+            className="rounded-full bg-sage px-5 py-2 font-semibold uppercase tracking-wider text-white transition hover:bg-sage-dark"
           >
-            Join
+            Join a Study
           </Link>
         </nav>
       </div>
