@@ -149,8 +149,16 @@ function personHasTag(person: Person, tag: string): boolean {
 function contactSpherePowers(person: Person): number[] {
   const rx = person.contact_rx as { od?: unknown; os?: unknown } | null;
   if (!rx || typeof rx !== "object") return [];
+  // Each eye is { sphere, cylinder, axis }. (Legacy records stored the sphere
+  // directly as a string/number, so handle both shapes.)
+  const sphereOf = (eye: unknown): number => {
+    if (eye && typeof eye === "object" && "sphere" in eye) {
+      return Number((eye as { sphere?: unknown }).sphere);
+    }
+    return Number(eye);
+  };
   return [rx.od, rx.os]
-    .map((v) => Number(v))
+    .map(sphereOf)
     .filter((n) => Number.isFinite(n));
 }
 

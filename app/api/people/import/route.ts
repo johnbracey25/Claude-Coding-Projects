@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
     if (!u.id) continue;
     const { error } = await supabase
       .from("people")
-      .update(u.values)
+      .update(omitEmpty(u.values))
       .eq("id", u.id);
     if (error) errors.push(error.message);
     else updated += 1;
@@ -167,6 +167,19 @@ export async function POST(req: NextRequest) {
 
 function unique<T>(arr: T[]): T[] {
   return Array.from(new Set(arr));
+}
+
+/** Drop keys whose value is null/undefined/""/[] so an import never blanks out
+ * existing data with empty cells (keeps false and 0). */
+function omitEmpty<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === null || v === undefined) continue;
+    if (typeof v === "string" && v.trim() === "") continue;
+    if (Array.isArray(v) && v.length === 0) continue;
+    out[k] = v;
+  }
+  return out as Partial<T>;
 }
 
 function chunked<T>(arr: T[], size: number): T[][] {
