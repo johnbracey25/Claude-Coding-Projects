@@ -28,7 +28,10 @@ export const isSmsConfigured =
   !!process.env.TWILIO_FROM_NUMBER;
 
 // Two-way Google Calendar (service account writes bookings onto the calendar).
+// Credentials can be supplied either as the whole service-account JSON in
+// GOOGLE_SERVICE_ACCOUNT_JSON (easiest — paste the downloaded file), or as
+// separate GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY.
 export const isGoogleCalendarConfigured =
-  !!process.env.GOOGLE_CLIENT_EMAIL &&
-  !!process.env.GOOGLE_PRIVATE_KEY &&
+  (!!process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
+    (!!process.env.GOOGLE_CLIENT_EMAIL && !!process.env.GOOGLE_PRIVATE_KEY)) &&
   !!process.env.GOOGLE_CALENDAR_ID;
