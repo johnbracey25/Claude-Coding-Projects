@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isSupabaseConfigured } from "@/lib/config";
+import { isSupabaseConfigured, appUrl } from "@/lib/config";
 import { normalizePhone, normalizeDate } from "@/lib/people-fields";
+import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
+import { welcome } from "@/lib/templates";
 import type { PersonInput } from "@/lib/types";
 
 /**
@@ -141,6 +143,9 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
+  let personId: string | null = null;
+  let isNewSignup = false;
+
   // Look for an existing person by email or phone to avoid duplicates.
   try {
     let existingId: string | null = null;
@@ -190,9 +195,16 @@ export async function POST(req: NextRequest) {
         .update(updates)
         .eq("id", existingId);
       if (error) throw error;
+      personId = existingId;
     } else {
-      const { error } = await supabase.from("people").insert(values);
+      const { data, error } = await supabase
+        .from("people")
+        .insert(values)
+        .select("id")
+        .single();
       if (error) throw error;
+      personId = data.id;
+      isNewSignup = true;
     }
   } catch (e) {
     return NextResponse.json(
@@ -203,6 +215,49 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 }
     );
+  }
+
+  // Send a personal welcome from Dr. Hacker on brand-new signups (best-effort;
+  // never fails the signup). Repeat submissions don't re-trigger it.
+  if (isNewSignup) {
+    const channel = chooseChannel({
+      email,
+      phone,
+      emailOptIn: true,
+      smsOptIn: !!phone,
+    });
+    const tpl = welcome(first, `${appUrl}/about`);
+    try {
+      if (channel === "email" && email) {
+        const r = await sendEmail({
+          to: email,
+          subject: tpl.subject,
+          html: tpl.html,
+          text: tpl.text,
+        });
+        await supabase.from("messages").insert({
+          person_id: personId,
+          channel: "email",
+          subject: tpl.subject,
+          body: tpl.text,
+          status: r.ok ? "sent" : r.skipped ? "skipped" : "failed",
+          provider_id: r.providerId ?? null,
+          error: r.error ?? null,
+        });
+      } else if (channel === "sms" && phone) {
+        const r = await sendSms({ to: phone, body: tpl.sms });
+        await supabase.from("messages").insert({
+          person_id: personId,
+          channel: "sms",
+          body: tpl.sms,
+          status: r.ok ? "sent" : r.skipped ? "skipped" : "failed",
+          provider_id: r.providerId ?? null,
+          error: r.error ?? null,
+        });
+      }
+    } catch {
+      // Welcome message failure must not affect the signup result.
+    }
   }
 
   return NextResponse.json({ ok: true });

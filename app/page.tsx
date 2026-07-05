@@ -34,6 +34,10 @@ export default function Home() {
         Interested in taking part in a study? Tap &ldquo;Join a research
         study.&rdquo; Staff use the sign-in to manage people and scheduling.
       </p>
+
+      <Link href="/about" className="text-sm text-brand-dark hover:underline">
+        About Dr. Lauren Hacker &amp; Eve Research
+      </Link>
     </main>
   );
 }
