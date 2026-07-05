@@ -74,12 +74,14 @@ export default async function CalendarPage() {
         {/* Google Calendar (iCal) sync */}
         <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-semibold text-slate-600">
-            Google Calendar sync (read-only)
+            Availability calendar sync (read-only)
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            Paste Lauren&apos;s calendar &quot;secret address in iCal format&quot;.
-            Her events become bookable windows and refresh automatically every
-            hour. Optionally filter to only events whose title contains a keyword.
+            Paste the &quot;secret address in iCal format&quot; for the calendar
+            that holds your open availability blocks (Lisa&apos;s). Those events
+            become bookable windows and refresh automatically each day. Times when
+            Lauren is busy are removed automatically. Optionally filter to only
+            events whose title contains a keyword.
           </p>
           <form action={saveIcalSettings} className="mt-3 space-y-2">
             <input
