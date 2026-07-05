@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/config";
 import { computeSlots, gapRange, type TimeRange } from "@/lib/scheduling";
+import { easternDateStartUtc, easternDateEndUtc } from "@/lib/timezone";
 import type { Study } from "@/lib/types";
 
 /**
@@ -56,12 +57,18 @@ export async function GET(req: NextRequest) {
   let rangeStart = gap.rangeStart;
   let rangeEnd = gap.rangeEnd;
   if (study.start_window) {
-    const s = new Date(`${study.start_window}T00:00:00Z`);
-    rangeStart = rangeStart && rangeStart > s ? rangeStart : s;
+    const iso = easternDateStartUtc(study.start_window);
+    if (iso) {
+      const s = new Date(iso);
+      rangeStart = rangeStart && rangeStart > s ? rangeStart : s;
+    }
   }
   if (study.end_window) {
-    const e = new Date(`${study.end_window}T23:59:59Z`);
-    rangeEnd = rangeEnd && rangeEnd < e ? rangeEnd : e;
+    const iso = easternDateEndUtc(study.end_window);
+    if (iso) {
+      const e = new Date(iso);
+      rangeEnd = rangeEnd && rangeEnd < e ? rangeEnd : e;
+    }
   }
 
   const slots = computeSlots({

@@ -1,9 +1,9 @@
 /**
- * Display helpers for scheduled times. Availability and appointments are stored
- * as wall-clock times (entered by staff, read from Google), so we format in UTC
- * to show exactly what was entered without timezone shifting. (A configurable
- * business timezone can replace this later.)
+ * Display helpers for scheduled times. Times are stored as true UTC instants and
+ * always shown in US Eastern (the business timezone) so booking times read the
+ * same on every device.
  */
+import { APP_TZ } from "./timezone";
 
 export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString("en-US", {
@@ -12,7 +12,8 @@ export function formatDateTime(iso: string): string {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "UTC",
+    timeZoneName: "short",
+    timeZone: APP_TZ,
   });
 }
 
@@ -21,7 +22,7 @@ export function formatDate(iso: string): string {
     weekday: "short",
     month: "short",
     day: "numeric",
-    timeZone: "UTC",
+    timeZone: APP_TZ,
   });
 }
 
@@ -29,6 +30,6 @@ export function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "UTC",
+    timeZone: APP_TZ,
   });
 }

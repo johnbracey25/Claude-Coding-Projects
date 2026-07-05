@@ -16,12 +16,42 @@ interface Selection {
   duration_min: number;
 }
 
+/** Compact UTC stamp for a Google Calendar template link (YYYYMMDDTHHMMSSZ). */
+function gcalStamp(iso: string): string {
+  return new Date(iso)
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
+}
+
+function addToCalendarUrl(
+  title: string,
+  startIso: string,
+  durationMin: number,
+  location?: string | null
+): string {
+  const start = new Date(startIso);
+  const end = new Date(start.getTime() + durationMin * 60_000);
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${gcalStamp(startIso)}/${gcalStamp(end.toISOString())}`,
+    ctz: "America/New_York",
+  });
+  if (location) params.set("location", location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 export default function BookingFlow({
   token,
   visits,
+  studyName,
+  location,
 }: {
   token: string;
   visits: VisitInfo[];
+  studyName: string;
+  location?: string | null;
 }) {
   const [selected, setSelected] = useState<Selection[]>([]);
   const [slots, setSlots] = useState<string[]>([]);
@@ -102,14 +132,30 @@ export default function BookingFlow({
     return (
       <div className="text-center">
         <h2 className="text-xl font-bold text-emerald-700">You&apos;re booked! 🎉</h2>
-        <ul className="mt-4 space-y-1 text-slate-700">
+        <ul className="mt-4 space-y-3 text-slate-700">
           {selected.map((s, i) => (
-            <li key={i}>
-              <span className="font-medium">{s.visit_name}:</span>{" "}
-              {formatDateTime(s.starts_at)}
+            <li key={i} className="rounded-lg bg-slate-50 p-3">
+              <div className="font-medium">{s.visit_name}</div>
+              <div className="text-sm">{formatDateTime(s.starts_at)}</div>
+              <a
+                href={addToCalendarUrl(
+                  `${studyName} - ${s.visit_name}`,
+                  s.starts_at,
+                  s.duration_min,
+                  location
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-sm font-medium text-brand-dark hover:underline"
+              >
+                Add to calendar
+              </a>
             </li>
           ))}
         </ul>
+        {location && (
+          <p className="mt-3 text-sm text-slate-500">Location: {location}</p>
+        )}
         <p className="mt-4 text-sm text-slate-500">
           We&apos;ve sent a confirmation. See you then!
         </p>
