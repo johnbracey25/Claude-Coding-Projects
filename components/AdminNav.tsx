@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/studies", label: "Studies" },
   { href: "/candidates", label: "Candidates" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/messages", label: "Messages" },
 ];
 
 export default function AdminNav() {
