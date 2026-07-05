@@ -56,6 +56,13 @@ export async function GET(req: NextRequest) {
   const gap = gapRange(after, visit);
   let rangeStart = gap.rangeStart;
   let rangeEnd = gap.rangeEnd;
+
+  // Minimum booking lead time (notice).
+  const leadHours = study.min_lead_hours ?? 0;
+  if (leadHours > 0) {
+    const lead = new Date(Date.now() + leadHours * 60 * 60 * 1000);
+    rangeStart = rangeStart && rangeStart > lead ? rangeStart : lead;
+  }
   if (study.start_window) {
     const iso = easternDateStartUtc(study.start_window);
     if (iso) {
@@ -76,6 +83,7 @@ export async function GET(req: NextRequest) {
     busy: (appts ?? []) as TimeRange[],
     durationMin: visit.duration_min,
     stepMin: 30,
+    bufferMin: study.buffer_min ?? 0,
     rangeStart,
     rangeEnd,
     maxSlots: 200,

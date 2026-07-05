@@ -133,6 +133,32 @@ export default function StudyForm({ study }: { study?: Study }) {
           <span className="mb-1 block text-sm font-medium text-slate-600">Recruiting until</span>
           <input name="end_window" type="date" defaultValue={study?.end_window ?? ""} className={`w-full ${inputCls}`} />
         </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-600">
+            Buffer between visits (minutes)
+          </span>
+          <input
+            name="buffer_min"
+            type="number"
+            min="0"
+            step="5"
+            defaultValue={study?.buffer_min ?? 0}
+            className={`w-full ${inputCls}`}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-600">
+            Minimum notice before a visit (hours)
+          </span>
+          <input
+            name="min_lead_hours"
+            type="number"
+            min="0"
+            step="1"
+            defaultValue={study?.min_lead_hours ?? 0}
+            className={`w-full ${inputCls}`}
+          />
+        </label>
         <label className="block sm:col-span-2">
           <span className="mb-1 block text-sm font-medium text-slate-600">Compensation (shown to participants, optional)</span>
           <input name="compensation" defaultValue={study?.compensation ?? ""} className={`w-full ${inputCls}`} />

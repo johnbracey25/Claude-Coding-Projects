@@ -26,3 +26,9 @@ export const isSmsConfigured =
   !!process.env.TWILIO_ACCOUNT_SID &&
   !!process.env.TWILIO_AUTH_TOKEN &&
   !!process.env.TWILIO_FROM_NUMBER;
+
+// Two-way Google Calendar (service account writes bookings onto the calendar).
+export const isGoogleCalendarConfigured =
+  !!process.env.GOOGLE_CLIENT_EMAIL &&
+  !!process.env.GOOGLE_PRIVATE_KEY &&
+  !!process.env.GOOGLE_CALENDAR_ID;

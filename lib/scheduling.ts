@@ -21,6 +21,8 @@ export interface ComputeSlotsParams {
   busy: TimeRange[];
   durationMin: number;
   stepMin?: number;
+  /** Minutes of empty time required around each existing appointment. */
+  bufferMin?: number;
   /** Earliest allowed start (e.g. now, or prior visit + min gap). */
   rangeStart?: Date;
   /** Latest allowed end (e.g. study end, or prior visit + max gap). */
@@ -40,6 +42,7 @@ export function computeSlots(params: ComputeSlotsParams): string[] {
     busy,
     durationMin,
     stepMin = 30,
+    bufferMin = 0,
     rangeStart,
     rangeEnd,
     now = new Date(),
@@ -48,14 +51,17 @@ export function computeSlots(params: ComputeSlotsParams): string[] {
 
   const durMs = durationMin * MINUTE;
   const stepMs = stepMin * MINUTE;
+  const bufMs = Math.max(0, bufferMin) * MINUTE;
   if (durMs <= 0 || stepMs <= 0) return [];
 
   const lower = Math.max(now.getTime(), rangeStart?.getTime() ?? -Infinity);
   const upper = rangeEnd?.getTime() ?? Infinity;
 
+  // Inflate each busy interval by the buffer on both sides so new bookings keep
+  // the required gap from existing appointments.
   const busyMs = busy.map((b) => ({
-    s: new Date(b.starts_at).getTime(),
-    e: new Date(b.ends_at).getTime(),
+    s: new Date(b.starts_at).getTime() - bufMs,
+    e: new Date(b.ends_at).getTime() + bufMs,
   }));
 
   const slots: number[] = [];
