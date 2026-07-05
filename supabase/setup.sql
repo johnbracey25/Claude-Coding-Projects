@@ -148,4 +148,44 @@ drop policy if exists "staff_full_access" on messages;
 create policy "staff_full_access" on messages
   for all to authenticated using (true) with check (true);
 
--- Done. You should now have: people, studies, candidates, messages.
+-- ── Scheduling: availability windows + appointments ─────────────────────────
+create table if not exists availability_windows (
+  id              uuid primary key default gen_random_uuid(),
+  label           text,
+  starts_at       timestamptz not null,
+  ends_at         timestamptz not null,
+  location        text,
+  source          text not null default 'manual',
+  google_event_id text,
+  created_at      timestamptz not null default now()
+);
+create index if not exists availability_starts_idx on availability_windows (starts_at);
+
+create table if not exists appointments (
+  id              uuid primary key default gen_random_uuid(),
+  candidate_id    uuid references candidates(id) on delete set null,
+  person_id       uuid references people(id) on delete cascade,
+  study_id        uuid references studies(id) on delete cascade,
+  visit_number    int not null default 1,
+  visit_name      text,
+  starts_at       timestamptz not null,
+  ends_at         timestamptz not null,
+  status          text not null default 'scheduled',
+  location        text,
+  google_event_id text,
+  created_at      timestamptz not null default now()
+);
+create index if not exists appointments_starts_idx on appointments (starts_at);
+create index if not exists appointments_study_idx on appointments (study_id);
+create index if not exists appointments_person_idx on appointments (person_id);
+
+alter table availability_windows enable row level security;
+alter table appointments enable row level security;
+drop policy if exists "staff_full_access" on availability_windows;
+create policy "staff_full_access" on availability_windows
+  for all to authenticated using (true) with check (true);
+drop policy if exists "staff_full_access" on appointments;
+create policy "staff_full_access" on appointments
+  for all to authenticated using (true) with check (true);
+
+-- Done. Tables: people, studies, candidates, messages, availability_windows, appointments.

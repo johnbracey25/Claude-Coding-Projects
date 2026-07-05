@@ -32,9 +32,13 @@ export default function ResponseButtons({ token }: { token: string }) {
     return (
       <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-5 text-center text-emerald-800">
         <p className="font-semibold">Great, thank you! 🎉</p>
-        <p className="mt-1 text-sm">
-          We&apos;ll be in touch soon with the next steps and available times.
-        </p>
+        <p className="mt-1 text-sm">You can pick a time that works for you now.</p>
+        <a
+          href={`/book/${token}`}
+          className="mt-4 inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+        >
+          Choose your time
+        </a>
       </div>
     );
   }
