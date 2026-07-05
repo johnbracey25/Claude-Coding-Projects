@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { runMatching } from "@/lib/studies";
-import { sendEmail, sendSms } from "@/lib/messaging";
+import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
 import { inviteEmail, inviteSms } from "@/lib/templates";
 import type { StudyStatus, Person, Study, Candidate } from "@/lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -93,16 +93,18 @@ async function inviteOne(
   const cand = data as unknown as CandidateJoined;
   const { person, study } = cand;
 
-  const canEmail = !!person.email && person.email_opt_in;
-  const canSms = !!person.phone && person.sms_opt_in;
+  const channel = chooseChannel({
+    email: person.email,
+    phone: person.phone,
+    emailOptIn: person.email_opt_in,
+    smsOptIn: person.sms_opt_in,
+  });
 
-  let channel: "email" | "sms" | null = null;
   let result;
   let subject: string | null = null;
   let body: string | null = null;
 
-  if (canEmail) {
-    channel = "email";
+  if (channel === "email") {
     const tpl = inviteEmail(person, study, cand);
     subject = tpl.subject;
     body = tpl.text;
@@ -112,8 +114,7 @@ async function inviteOne(
       html: tpl.html,
       text: tpl.text,
     });
-  } else if (canSms) {
-    channel = "sms";
+  } else if (channel === "sms") {
     body = inviteSms(person, study, cand);
     result = await sendSms({ to: person.phone!, body });
   }
