@@ -95,6 +95,11 @@ export default async function PeoplePage({
                               ? `${p.last_name}${p.last_name && p.first_name ? ", " : ""}${p.first_name}`
                               : "(no name)"}
                           </Link>
+                          {p.is_repeat_participant && (
+                            <span className="ml-2 rounded-full bg-sage/20 px-2 py-0.5 text-xs font-medium text-sage-dark">
+                              Repeat
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-2 text-slate-600">{p.email ?? "-"}</td>
                         <td className="px-4 py-2 text-slate-600">{p.phone ?? "-"}</td>

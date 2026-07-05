@@ -52,6 +52,7 @@ create table if not exists people (
   last_screened_at     timestamptz,
   consent_to_contact   boolean not null default false,
   signed_up_at         timestamptz,
+  is_repeat_participant boolean not null default false,
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );
@@ -62,6 +63,7 @@ create index if not exists people_phone_idx on people (phone);
 create index if not exists people_last_name_idx on people (lower(last_name));
 create index if not exists people_status_idx on people (status);
 create index if not exists people_source_idx on people (source);
+create index if not exists people_repeat_idx on people (is_repeat_participant);
 
 drop trigger if exists people_set_updated_at on people;
 create trigger people_set_updated_at

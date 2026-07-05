@@ -36,6 +36,8 @@ export type CriterionKey =
   | "age"
   | "had_cataract_surgery"
   | "wears_contacts"
+  | "contact_rx_sphere"
+  | "is_repeat_participant"
   | "eye_conditions"
   | "ocular_health_issues";
 
@@ -45,7 +47,7 @@ export interface CriterionDef {
   /** Operators offered for this criterion in the builder UI. */
   ops: { op: RuleOp; label: string }[];
   /** Input shape the UI should render for the value. */
-  valueInput: "age_range" | "number" | "boolean" | "text" | "none";
+  valueInput: "age_range" | "rx_range" | "number" | "boolean" | "text" | "none";
   help?: string;
 }
 
@@ -72,6 +74,24 @@ export const CRITERIA: CriterionDef[] = [
     label: "Wears contact lenses",
     ops: [{ op: "eq", label: "is" }],
     valueInput: "boolean",
+  },
+  {
+    key: "contact_rx_sphere",
+    label: "Contact lens power",
+    ops: [
+      { op: "between", label: "is between" },
+      { op: "gte", label: "is at least" },
+      { op: "lte", label: "is at most" },
+    ],
+    valueInput: "rx_range",
+    help: "Sphere power in diopters (e.g. -4.00 to -1.00). Matches if either eye falls in range. Non-wearers won't match.",
+  },
+  {
+    key: "is_repeat_participant",
+    label: "Repeat participant",
+    ops: [{ op: "eq", label: "is" }],
+    valueInput: "boolean",
+    help: "Whether they've taken part in a previous study.",
   },
   {
     key: "eye_conditions",
@@ -122,6 +142,18 @@ function personHasTag(person: Person, tag: string): boolean {
   return (person.tags ?? []).includes(tag);
 }
 
+/**
+ * Numeric sphere powers from a person's stored contact_rx ({ od, os }).
+ * Skips "unknown"/blank/unparseable values. Returns [] when nothing usable.
+ */
+function contactSpherePowers(person: Person): number[] {
+  const rx = person.contact_rx as { od?: unknown; os?: unknown } | null;
+  if (!rx || typeof rx !== "object") return [];
+  return [rx.od, rx.os]
+    .map((v) => Number(v))
+    .filter((n) => Number.isFinite(n));
+}
+
 function arrayHas(arr: string[] | null, needle: unknown): boolean {
   const n = String(needle ?? "").trim().toLowerCase();
   return (arr ?? []).some((x) => x.toLowerCase() === n);
@@ -168,6 +200,40 @@ function evalRule(person: Person, rule: Rule, asOf: Date): RuleResult {
       return has === want
         ? pass(`Wears contacts = ${has}`)
         : fail(`Wears contacts = ${has}, needs ${want}`);
+    }
+
+    case "is_repeat_participant": {
+      const want = rule.value === true || rule.value === "yes" || rule.value === "true";
+      const has = !!person.is_repeat_participant;
+      return has === want
+        ? pass(`Repeat participant = ${has}`)
+        : fail(`Repeat participant = ${has}, needs ${want}`);
+    }
+
+    case "contact_rx_sphere": {
+      const powers = contactSpherePowers(person);
+      if (powers.length === 0)
+        return fail("No contact lens prescription on file");
+      const label = powers.map((p) => p.toFixed(2)).join(" / ");
+      if (rule.op === "between") {
+        const [min, max] = (rule.value as [number, number]) ?? [-99, 99];
+        return powers.some((p) => p >= min && p <= max)
+          ? pass(`Power ${label} within ${min} to ${max}`)
+          : fail(`Power ${label} outside ${min} to ${max}`);
+      }
+      if (rule.op === "gte") {
+        const min = Number(rule.value);
+        return powers.some((p) => p >= min)
+          ? pass(`Power ${label} ≥ ${min}`)
+          : fail(`Power ${label} < ${min}`);
+      }
+      if (rule.op === "lte") {
+        const max = Number(rule.value);
+        return powers.some((p) => p <= max)
+          ? pass(`Power ${label} ≤ ${max}`)
+          : fail(`Power ${label} > ${max}`);
+      }
+      return fail("Unsupported prescription comparison");
     }
 
     case "eye_conditions": {

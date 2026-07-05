@@ -98,7 +98,7 @@ export default function PersonForm({ person }: { person?: Person }) {
         <textarea name="notes" defaultValue={person?.notes ?? ""} rows={3} className={input} />
       </Field>
 
-      <div className="flex gap-6">
+      <div className="flex flex-wrap gap-6">
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input
             type="checkbox"
@@ -114,6 +114,14 @@ export default function PersonForm({ person }: { person?: Person }) {
             defaultChecked={person ? person.sms_opt_in : true}
           />
           SMS opt-in
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            name="is_repeat_participant"
+            defaultChecked={person ? person.is_repeat_participant : false}
+          />
+          Repeat participant
         </label>
       </div>
 
