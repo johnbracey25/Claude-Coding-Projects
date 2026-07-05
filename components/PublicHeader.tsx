@@ -9,7 +9,7 @@ export default function PublicHeader() {
           <img
             src="/eve-research-logo.png"
             alt="Eve Research"
-            className="h-9 w-9 rounded object-contain"
+            className="h-10 w-10 rounded-lg object-contain"
           />
           <span className="font-serif text-lg font-semibold tracking-tight text-brand-dark">
             Eve Research
