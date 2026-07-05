@@ -86,6 +86,8 @@ create table if not exists studies (
   eligibility_rules jsonb not null default '{"all":[]}'::jsonb,
   visit_plan        jsonb not null default '{"visits":[{"name":"Visit 1","duration_min":60}]}'::jsonb,
   compensation      text,
+  address           text,
+  prep_instructions text,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );
@@ -173,6 +175,7 @@ create table if not exists appointments (
   status          text not null default 'scheduled',
   location        text,
   google_event_id text,
+  reminder_sent_at timestamptz,
   created_at      timestamptz not null default now()
 );
 create index if not exists appointments_starts_idx on appointments (starts_at);

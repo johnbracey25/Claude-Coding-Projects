@@ -13,8 +13,14 @@ export const isSupabaseConfigured =
 export const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-export const isEmailConfigured =
+// Email works via Resend (needs a domain) OR Gmail/SMTP (needs an app password).
+export const isResendConfigured =
   !!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM;
+
+export const isSmtpConfigured =
+  !!process.env.SMTP_USER && !!process.env.SMTP_PASS;
+
+export const isEmailConfigured = isResendConfigured || isSmtpConfigured;
 
 export const isSmsConfigured =
   !!process.env.TWILIO_ACCOUNT_SID &&

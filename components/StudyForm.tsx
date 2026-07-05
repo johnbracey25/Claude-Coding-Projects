@@ -137,6 +137,29 @@ export default function StudyForm({ study }: { study?: Study }) {
           <span className="mb-1 block text-sm font-medium text-slate-600">Compensation (shown to participants, optional)</span>
           <input name="compensation" defaultValue={study?.compensation ?? ""} className={`w-full ${inputCls}`} />
         </label>
+        <label className="block sm:col-span-2">
+          <span className="mb-1 block text-sm font-medium text-slate-600">
+            Address (used for the map link in the day-before email)
+          </span>
+          <input
+            name="address"
+            placeholder="e.g. 123 Main St, Athens, GA 30605"
+            defaultValue={study?.address ?? ""}
+            className={`w-full ${inputCls}`}
+          />
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="mb-1 block text-sm font-medium text-slate-600">
+            What to bring / expect (shown in the day-before email, optional)
+          </span>
+          <textarea
+            name="prep_instructions"
+            rows={2}
+            placeholder="e.g. Please bring your glasses and current contact lenses. Parking is free in the front lot."
+            defaultValue={study?.prep_instructions ?? ""}
+            className={`w-full ${inputCls}`}
+          />
+        </label>
       </div>
 
       {/* Eligibility rules */}
