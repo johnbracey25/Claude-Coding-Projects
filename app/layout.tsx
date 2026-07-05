@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
-const heading = Cormorant_Garamond({
+const heading = Playfair_Display({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-heading",
 });
-const body = DM_Sans({
+const body = Inter({
   subsets: ["latin"],
   variable: "--font-body",
 });
