@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
-import EveLogo from "@/components/EveLogo";
 
 export const metadata: Metadata = {
   title: "About Dr. Lauren Hacker, O.D. & Eve Research",
@@ -34,7 +33,12 @@ export default function AboutPage() {
       <main className="mx-auto max-w-3xl px-5">
         {/* Hero */}
         <section className="pt-12 text-center">
-          <EveLogo size="sm" className="mx-auto h-20 w-28" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/eve-research-logo.png"
+            alt="Eve Research"
+            className="mx-auto h-28 w-28 rounded-2xl object-contain shadow-sm ring-1 ring-black/5"
+          />
           <div className="mt-5">
             <Eyebrow>Meet the founder</Eyebrow>
           </div>
