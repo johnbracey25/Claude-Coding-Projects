@@ -188,4 +188,16 @@ drop policy if exists "staff_full_access" on appointments;
 create policy "staff_full_access" on appointments
   for all to authenticated using (true) with check (true);
 
--- Done. Tables: people, studies, candidates, messages, availability_windows, appointments.
+-- ── App settings (key/value: iCal feed URL, etc.) ───────────────────────────
+create table if not exists app_settings (
+  key        text primary key,
+  value      text,
+  updated_at timestamptz not null default now()
+);
+alter table app_settings enable row level security;
+drop policy if exists "staff_full_access" on app_settings;
+create policy "staff_full_access" on app_settings
+  for all to authenticated using (true) with check (true);
+
+-- Done. Tables: people, studies, candidates, messages, availability_windows,
+-- appointments, app_settings.

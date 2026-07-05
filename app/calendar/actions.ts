@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { easternToUtcIso } from "@/lib/timezone";
+import { setSetting } from "@/lib/settings";
+import { syncFromIcal } from "@/lib/calendar-sync";
 
 /**
  * Turn a datetime-local value ("2026-07-10T09:00"), entered in US Eastern, into
@@ -36,6 +38,21 @@ export async function deleteAvailabilityWindow(formData: FormData) {
   if (!id) return;
   const supabase = createClient();
   await supabase.from("availability_windows").delete().eq("id", id);
+  revalidatePath("/calendar");
+}
+
+/** Save the Google Calendar iCal feed URL + optional keyword filter. */
+export async function saveIcalSettings(formData: FormData) {
+  const url = String(formData.get("ical_url") ?? "").trim();
+  const keyword = String(formData.get("ical_keyword") ?? "").trim();
+  await setSetting("ical_url", url);
+  await setSetting("ical_keyword", keyword);
+  revalidatePath("/calendar");
+}
+
+/** Pull availability from the configured iCal feed now. */
+export async function syncNow() {
+  await syncFromIcal();
   revalidatePath("/calendar");
 }
 
