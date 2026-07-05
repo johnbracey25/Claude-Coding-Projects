@@ -49,14 +49,16 @@ export default function Home() {
       <PublicHeader />
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-5 py-16 text-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/eve-research-logo.png"
-          alt="Eve Research"
-          className="h-44 w-44 rounded-2xl object-contain drop-shadow-sm"
-        />
+        <div className="rounded-3xl bg-white/60 p-5 shadow-lg shadow-brand/5 ring-1 ring-white/80">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/eve-research-logo.png"
+            alt="Eve Research"
+            className="h-52 w-52 rounded-2xl object-contain sm:h-56 sm:w-56"
+          />
+        </div>
 
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-sage-dark">
+        <p className="mt-8 text-xs font-semibold uppercase tracking-[0.25em] text-sage-dark">
           Eye &amp; Vision Research · Athens, GA
         </p>
         <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight text-brand-dark sm:text-5xl">
