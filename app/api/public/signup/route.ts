@@ -12,6 +12,12 @@ import type { PersonInput } from "@/lib/types";
  * than duplicate a person.
  */
 
+interface EyeRxInput {
+  sphere?: string;
+  cylinder?: string;
+  axis?: string;
+}
+
 interface SignupBody {
   first_name?: string;
   last_name?: string;
@@ -19,7 +25,10 @@ interface SignupBody {
   phone?: string;
   date_of_birth?: string;
   wears_contacts?: boolean;
-  contact_rx?: { od?: string; os?: string } | null;
+  contact_rx?: {
+    od?: EyeRxInput | null;
+    os?: EyeRxInput | null;
+  } | null;
   had_cataract_surgery?: "yes" | "no" | "";
   eye_conditions?: string[];
   notes?: string;
@@ -106,13 +115,10 @@ export async function POST(req: NextRequest) {
     : [];
   const tags = body.wears_contacts ? ["contact_lens_wearer"] : [];
 
-  // Structured contact-lens prescription (per eye), only when they wear contacts.
-  const rxOd = body.contact_rx?.od?.toString().slice(0, 12);
-  const rxOs = body.contact_rx?.os?.toString().slice(0, 12);
-  const contactRx =
-    body.wears_contacts && (rxOd || rxOs)
-      ? { od: rxOd ?? null, os: rxOs ?? null }
-      : null;
+  // Structured contact-lens prescription (per eye: sphere/cylinder/axis).
+  const od = sanitizeEye(body.contact_rx?.od);
+  const os = sanitizeEye(body.contact_rx?.os);
+  const contactRx = body.wears_contacts && (od || os) ? { od, os } : null;
 
   const values: PersonInput = {
     first_name: first,
@@ -156,10 +162,32 @@ export async function POST(req: NextRequest) {
     }
 
     if (existingId) {
-      // Merge: refresh consent + any newly provided screening info.
+      // Non-destructive merge: never blank out existing data with empty values.
+      // Empty strings, empty arrays, and null are dropped so a partial re-signup
+      // only adds/updates the fields the person actually provided this time.
+      const updates = omitEmpty({
+        first_name: first,
+        last_name: last,
+        email,
+        phone,
+        date_of_birth: dob,
+        // Required on the form, so always a real yes/no.
+        had_cataract_surgery: values.had_cataract_surgery,
+        contact_rx: contactRx,
+        eye_conditions: eyeConditions,
+        tags,
+        notes: values.notes,
+        // Always refresh consent/opt-in and signup metadata.
+        email_opt_in: true,
+        sms_opt_in: !!phone,
+        consent_to_contact: true,
+        status: "active",
+        source,
+        signed_up_at: values.signed_up_at,
+      });
       const { error } = await supabase
         .from("people")
-        .update({ ...values, signed_up_at: values.signed_up_at })
+        .update(updates)
         .eq("id", existingId);
       if (error) throw error;
     } else {
@@ -178,4 +206,35 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+/** Keep only real sphere/cylinder/axis values; drop blanks and "Not sure". */
+function sanitizeEye(
+  input?: EyeRxInput | null
+): { sphere?: string; cylinder?: string; axis?: string } | null {
+  if (!input || typeof input !== "object") return null;
+  const clean = (v?: string) => {
+    const s = (v ?? "").toString().trim().slice(0, 8);
+    return s && s.toLowerCase() !== "unknown" ? s : undefined;
+  };
+  const out: { sphere?: string; cylinder?: string; axis?: string } = {};
+  const sphere = clean(input.sphere);
+  const cylinder = clean(input.cylinder);
+  const axis = clean(input.axis);
+  if (sphere) out.sphere = sphere;
+  if (cylinder) out.cylinder = cylinder;
+  if (axis) out.axis = axis;
+  return Object.keys(out).length ? out : null;
+}
+
+/** Drop keys whose value is null/undefined/""/[] (keeps false and 0). */
+function omitEmpty<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === null || v === undefined) continue;
+    if (typeof v === "string" && v.trim() === "") continue;
+    if (Array.isArray(v) && v.length === 0) continue;
+    out[k] = v;
+  }
+  return out as Partial<T>;
 }

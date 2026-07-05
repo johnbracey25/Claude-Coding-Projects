@@ -22,6 +22,36 @@ const POWERS: string[] = (() => {
   return out;
 })();
 
+// Toric cylinder powers, -0.25 down to -6.00 in 0.25 steps (minus-cyl convention).
+const CYLINDERS: string[] = (() => {
+  const out: string[] = [];
+  for (let q = -1; q >= -24; q--) out.push((q / 4).toFixed(2));
+  return out;
+})();
+
+// Axis in 10-degree steps (standard toric contact-lens availability).
+const AXES: string[] = (() => {
+  const out: string[] = [];
+  for (let a = 10; a <= 180; a += 10) out.push(String(a));
+  return out;
+})();
+
+interface EyeRx {
+  sphere: string;
+  cylinder: string;
+  axis: string;
+}
+const EMPTY_RX: EyeRx = { sphere: "", cylinder: "", axis: "" };
+
+/** Keep only the filled sub-fields, or null if nothing meaningful set. */
+function eyePayload(rx: EyeRx): Record<string, string> | null {
+  const o: Record<string, string> = {};
+  if (rx.sphere) o.sphere = rx.sphere;
+  if (rx.cylinder) o.cylinder = rx.cylinder;
+  if (rx.axis) o.axis = rx.axis;
+  return Object.keys(o).length ? o : null;
+}
+
 const inputCls =
   "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
 
@@ -31,8 +61,8 @@ export default function JoinForm() {
 
   const [conditions, setConditions] = useState<string[]>([]);
   const [wearsContacts, setWearsContacts] = useState("");
-  const [rxOd, setRxOd] = useState("");
-  const [rxOs, setRxOs] = useState("");
+  const [odRx, setOdRx] = useState<EyeRx>(EMPTY_RX);
+  const [osRx, setOsRx] = useState<EyeRx>(EMPTY_RX);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,8 +80,8 @@ export default function JoinForm() {
     const fd = new FormData(e.currentTarget);
     const wears = wearsContacts === "yes";
 
-    if (wears && (!rxOd || !rxOs)) {
-      setError("Please select your contact lens prescription for both eyes.");
+    if (wears && (!odRx.sphere || !osRx.sphere)) {
+      setError("Please select your contact lens power for both eyes.");
       return;
     }
 
@@ -63,7 +93,9 @@ export default function JoinForm() {
       phone: String(fd.get("phone") ?? ""),
       date_of_birth: String(fd.get("date_of_birth") ?? ""),
       wears_contacts: wears,
-      contact_rx: wears ? { od: rxOd, os: rxOs } : null,
+      contact_rx: wears
+        ? { od: eyePayload(odRx), os: eyePayload(osRx) }
+        : null,
       had_cataract_surgery: String(fd.get("had_cataract_surgery") ?? "") as
         | "yes"
         | "no"
@@ -89,6 +121,67 @@ export default function JoinForm() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function renderEye(
+    label: string,
+    rx: EyeRx,
+    setRx: (rx: EyeRx) => void
+  ) {
+    const hasCyl = !!rx.cylinder && rx.cylinder !== "unknown";
+    return (
+      <div className="rounded-lg border border-slate-200 p-3">
+        <p className="mb-2 text-sm font-semibold text-slate-700">{label}</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <label className="block">
+            <span className="mb-1 block text-xs text-slate-500">Power (sphere)</span>
+            <select
+              required
+              value={rx.sphere}
+              onChange={(e) => setRx({ ...rx, sphere: e.target.value })}
+              className={inputCls}
+            >
+              <option value="">Choose...</option>
+              <option value="unknown">Not sure</option>
+              {POWERS.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs text-slate-500">Cylinder</span>
+            <select
+              value={rx.cylinder}
+              onChange={(e) => {
+                const c = e.target.value;
+                setRx({ ...rx, cylinder: c, axis: c && c !== "unknown" ? rx.axis : "" });
+              }}
+              className={inputCls}
+            >
+              <option value="">None</option>
+              <option value="unknown">Not sure</option>
+              {CYLINDERS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs text-slate-500">Axis</span>
+            <select
+              value={rx.axis}
+              disabled={!hasCyl}
+              onChange={(e) => setRx({ ...rx, axis: e.target.value })}
+              className={`${inputCls} disabled:bg-slate-100 disabled:text-slate-400`}
+            >
+              <option value="">{hasCyl ? "Choose..." : "N/A"}</option>
+              {AXES.map((a) => (
+                <option key={a} value={a}>{a}°</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+    );
   }
 
   if (done) {
@@ -208,48 +301,13 @@ export default function JoinForm() {
         </div>
 
         {wearsContacts === "yes" && (
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-slate-700">
-                Right eye (OD) power
-              </span>
-              <select
-                required
-                value={rxOd}
-                onChange={(e) => setRxOd(e.target.value)}
-                className={inputCls}
-              >
-                <option value="">Please choose...</option>
-                <option value="unknown">Not sure</option>
-                {POWERS.map((p) => (
-                  <option key={`od-${p}`} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-slate-700">
-                Left eye (OS) power
-              </span>
-              <select
-                required
-                value={rxOs}
-                onChange={(e) => setRxOs(e.target.value)}
-                className={inputCls}
-              >
-                <option value="">Please choose...</option>
-                <option value="unknown">Not sure</option>
-                {POWERS.map((p) => (
-                  <option key={`os-${p}`} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="text-xs text-slate-500 sm:col-span-2">
-              This is the sphere power on your contact lens box (for example
-              -2.25). Choose &quot;Not sure&quot; if you don&apos;t have it handy.
+          <div className="mt-4 space-y-3">
+            {renderEye("Right eye (OD)", odRx, setOdRx)}
+            {renderEye("Left eye (OS)", osRx, setOsRx)}
+            <p className="text-xs text-slate-500">
+              Power (sphere) is on your contact lens box. Cylinder and axis apply
+              only to toric lenses for astigmatism. Choose &quot;Not sure&quot; for
+              anything you don&apos;t have handy.
             </p>
           </div>
         )}
