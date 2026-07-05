@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
 
 export const metadata: Metadata = {
@@ -87,13 +86,19 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PublicHeader />
-
       {/* Hero */}
-      <section className="mx-auto w-full max-w-6xl px-5 pb-12 pt-12 sm:pt-20">
+      <section className="mx-auto w-full max-w-6xl px-5 pb-12 pt-16 sm:pt-24">
         <div className="flex flex-col items-center gap-10 md:flex-row md:gap-16">
           {/* Left column */}
           <div className="flex-1 text-center md:flex-[4] md:text-left">
+            <div className="mb-6 flex items-center gap-2.5 justify-center md:justify-start">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/eve-icon.png" alt="" className="h-10 w-10 object-contain" />
+              <div className="flex flex-col leading-none">
+                <span className="font-serif text-xl font-bold tracking-tight text-brand-dark">Eve</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sage-dark">Research</span>
+              </div>
+            </div>
             <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-brand-dark sm:text-5xl lg:text-6xl">
               Better vision{" "}
               <br className="hidden sm:inline" />
