@@ -57,6 +57,8 @@ export interface Study {
   eligibility_rules: { all: unknown[] };
   visit_plan: VisitPlan;
   compensation: string | null;
+  address: string | null;
+  prep_instructions: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -107,6 +109,7 @@ export interface Appointment {
   status: "scheduled" | "completed" | "cancelled" | "no_show";
   location: string | null;
   google_event_id: string | null;
+  reminder_sent_at: string | null;
   created_at: string;
 }
 

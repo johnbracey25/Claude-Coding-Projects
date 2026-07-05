@@ -89,6 +89,65 @@ export function welcome(
   return { subject, html, text, sms };
 }
 
+/**
+ * Day-before pre-visit email: the details packet (address + map, what to bring,
+ * study info). Rich content, so it goes by email.
+ */
+export function preVisitEmail(
+  person: Person,
+  study: Study,
+  whenLabel: string,
+  visitName: string | null
+): { subject: string; html: string; text: string } {
+  const name = firstName(person);
+  const where = study.address || study.location || "";
+  const mapUrl = where
+    ? `https://maps.google.com/?q=${encodeURIComponent(where)}`
+    : "";
+  const prep = study.prep_instructions?.trim();
+
+  const subject = `Reminder: your ${study.name} visit is tomorrow`;
+
+  const textParts = [
+    `Hi ${name},`,
+    ``,
+    `This is a friendly reminder about your upcoming visit for "${study.name}".`,
+    ``,
+    `${visitName ? visitName + ": " : ""}${whenLabel}`,
+  ];
+  if (where) textParts.push(``, `Where: ${where}`);
+  if (mapUrl) textParts.push(`Map: ${mapUrl}`);
+  if (prep) textParts.push(``, `What to know: ${prep}`);
+  if (study.compensation) textParts.push(``, `Compensation: ${study.compensation}`);
+  textParts.push(
+    ``,
+    `If you can no longer make it, please reply to let us know.`,
+    ``,
+    `See you then,`,
+    `Dr. Lauren Hacker`,
+    `Eve Research`
+  );
+  const text = textParts.join("\n");
+
+  const html =
+    `<p>Hi ${name},</p>` +
+    `<p>This is a friendly reminder about your upcoming visit for <strong>${study.name}</strong>.</p>` +
+    `<p style="font-size:16px"><strong>${visitName ? visitName + ": " : ""}${whenLabel}</strong></p>` +
+    (where
+      ? `<p><strong>Where:</strong> ${where}` +
+        (mapUrl ? ` &middot; <a href="${mapUrl}">Open map</a>` : "") +
+        `</p>`
+      : "") +
+    (prep ? `<p><strong>What to know:</strong> ${prep}</p>` : "") +
+    (study.compensation
+      ? `<p><strong>Compensation:</strong> ${study.compensation}</p>`
+      : "") +
+    `<p>If you can no longer make it, please reply to let us know.</p>` +
+    `<p>See you then,<br/>Dr. Lauren Hacker<br/>Eve Research</p>`;
+
+  return { subject, html, text };
+}
+
 export function bookingConfirmation(
   person: Person,
   study: Study,

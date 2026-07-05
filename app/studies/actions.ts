@@ -39,6 +39,8 @@ export async function saveStudy(formData: FormData) {
     start_window: str(formData.get("start_window")),
     end_window: str(formData.get("end_window")),
     compensation: str(formData.get("compensation")),
+    address: str(formData.get("address")),
+    prep_instructions: str(formData.get("prep_instructions")),
     eligibility_rules,
     visit_plan,
   };
