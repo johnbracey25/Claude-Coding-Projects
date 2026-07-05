@@ -57,6 +57,38 @@ export function inviteSms(
   );
 }
 
+export function welcome(
+  firstNameRaw: string,
+  bioUrl: string
+): { subject: string; html: string; text: string; sms: string } {
+  const name = firstNameRaw?.trim() || "there";
+  const subject = "Welcome to Eve Research, a note from Dr. Lauren Hacker";
+  const text =
+    `Hi ${name},\n\n` +
+    `Thank you for adding your name to the Eve Research study list. I'm Dr. Lauren ` +
+    `Hacker, and I lead the eye-research studies here.\n\n` +
+    `When a study comes up that you may be a good fit for, I'll reach out personally ` +
+    `with the details and a link to choose a time that works for you. There's no ` +
+    `obligation, and you can opt out anytime.\n\n` +
+    `You can learn a little about me and Eve Research here: ${bioUrl}\n\n` +
+    `Warmly,\nDr. Lauren Hacker\nEve Research`;
+  const html =
+    `<p>Hi ${name},</p>` +
+    `<p>Thank you for adding your name to the Eve Research study list. I'm ` +
+    `Dr. Lauren Hacker, and I lead the eye-research studies here.</p>` +
+    `<p>When a study comes up that you may be a good fit for, I'll reach out ` +
+    `personally with the details and a link to choose a time that works for you. ` +
+    `There's no obligation, and you can opt out anytime.</p>` +
+    `<p>You can learn a little about me and Eve Research ` +
+    `<a href="${bioUrl}">here</a>.</p>` +
+    `<p>Warmly,<br/>Dr. Lauren Hacker<br/>Eve Research</p>`;
+  const sms =
+    `Hi ${name}, this is Dr. Lauren Hacker with Eve Research. Thank you for joining ` +
+    `our study list! When a study you may be a good fit for comes up, I'll reach out ` +
+    `personally. A little about me and our work: ${bioUrl}. Reply STOP to opt out.`;
+  return { subject, html, text, sms };
+}
+
 export function bookingConfirmation(
   person: Person,
   study: Study,
