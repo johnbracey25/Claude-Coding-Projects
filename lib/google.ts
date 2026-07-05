@@ -8,10 +8,26 @@ import { isGoogleCalendarConfigured } from "./config";
  * and booking still works (the app's own Calendar page always has the truth).
  */
 
+function credentials(): { email: string; key: string } {
+  // Preferred: the whole service-account JSON pasted into one env var. Parsing
+  // it yields a private_key with real newlines already.
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (raw) {
+    const json = JSON.parse(raw) as {
+      client_email?: string;
+      private_key?: string;
+    };
+    return { email: json.client_email ?? "", key: json.private_key ?? "" };
+  }
+  // Fallback: separate vars (key stored with literal "\n").
+  return {
+    email: process.env.GOOGLE_CLIENT_EMAIL ?? "",
+    key: (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
+  };
+}
+
 function calendarClient() {
-  const email = process.env.GOOGLE_CLIENT_EMAIL!;
-  // Vercel stores the key with literal "\n"; restore real newlines.
-  const key = (process.env.GOOGLE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n");
+  const { email, key } = credentials();
   const auth = new google.auth.JWT({
     email,
     key,
