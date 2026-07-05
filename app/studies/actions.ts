@@ -166,6 +166,45 @@ export async function inviteCandidate(formData: FormData) {
   revalidatePath(`/studies/${studyId}`);
 }
 
+/** Invite a specific set of candidates (from multi-select). */
+export async function inviteSelected(studyId: string, ids: string[]) {
+  if (!studyId || ids.length === 0) return;
+  const supabase = createClient();
+  for (const id of ids) await inviteOne(supabase, id);
+  revalidatePath(`/studies/${studyId}`);
+}
+
+/** Invite a single candidate by id (client-callable). */
+export async function inviteOneById(studyId: string, id: string) {
+  if (!id) return;
+  const supabase = createClient();
+  await inviteOne(supabase, id);
+  revalidatePath(`/studies/${studyId}`);
+}
+
+/** Set a candidate's status by id (client-callable). */
+export async function setStatusById(
+  studyId: string,
+  id: string,
+  status: string
+) {
+  if (!id || !status) return;
+  const supabase = createClient();
+  const { data: cand } = await supabase
+    .from("candidates")
+    .update({ status })
+    .eq("id", id)
+    .select("person_id")
+    .single();
+  if (status === "completed" && cand?.person_id) {
+    await supabase
+      .from("people")
+      .update({ is_repeat_participant: true })
+      .eq("id", cand.person_id);
+  }
+  revalidatePath(`/studies/${studyId}`);
+}
+
 /** Invite every candidate currently in 'eligible' status for a study. */
 export async function inviteAllEligible(formData: FormData) {
   const studyId = String(formData.get("study_id") ?? "");
