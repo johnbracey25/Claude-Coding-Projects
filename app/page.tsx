@@ -86,8 +86,18 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* Staff link -- top right, away from participant content */}
+      <div className="flex justify-end px-5 pt-4">
+        <Link
+          href="/dashboard"
+          className="text-xs text-slate-400 transition hover:text-brand-dark"
+        >
+          Staff sign in
+        </Link>
+      </div>
+
       {/* Hero */}
-      <section className="mx-auto w-full max-w-6xl px-5 pb-12 pt-16 sm:pt-24">
+      <section className="mx-auto w-full max-w-6xl px-5 pb-12 pt-8 sm:pt-16">
         <div className="flex flex-col items-center gap-10 md:flex-row md:gap-16">
           {/* Left column */}
           <div className="flex-1 text-center md:flex-[4] md:text-left">
@@ -153,16 +163,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* Staff link */}
-      <div className="py-6 text-center">
-        <Link
-          href="/dashboard"
-          className="text-sm text-slate-400 transition hover:text-brand-dark"
-        >
-          Staff sign in
-        </Link>
-      </div>
 
       <PublicFooter />
     </div>
