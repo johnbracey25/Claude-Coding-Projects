@@ -1,6 +1,28 @@
 import { appUrl } from "./config";
 import type { Person, Study, Candidate } from "./types";
 
+function emailLayout(bodyRows: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background-color:#f6f4ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f6f4ee">
+  <tr><td style="padding:24px 16px">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      ${bodyRows}
+      <tr>
+        <td style="padding:24px 32px 32px;text-align:center">
+          <p style="margin:0;font-size:12px;color:#94a3b8">Eve Research &middot; Athens, Georgia</p>
+          <p style="margin:4px 0 0;font-size:12px;color:#94a3b8"><a href="https://eve-research.com" style="color:#90a687;text-decoration:none">eve-research.com</a></p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+}
+
 export function responseUrl(candidate: Pick<Candidate, "token">): string {
   return `${appUrl}/r/${candidate.token}`;
 }
@@ -30,12 +52,36 @@ export function inviteEmail(
     `If you're interested, let us know here: ${link}\n\n` +
     `Thanks,\nEve Research\n\n` +
     `Don't want these emails? Unsubscribe: ${unsub}`;
-  const html =
-    `<p>Hi ${firstName(person)},</p>` +
-    `<p>Based on what you told us, you may be a good fit for our study <strong>${study.name}</strong>.${comp}</p>` +
-    `<p><a href="${link}" style="display:inline-block;background:#0f766e;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">I'm interested &rarr;</a></p>` +
-    `<p>Thanks,<br/>Eve Research</p>` +
-    `<p style="color:#94a3b8;font-size:12px">Don't want these emails? <a href="${unsub}">Unsubscribe</a>.</p>`;
+  const html = emailLayout(`
+    <tr>
+      <td style="padding:32px 32px 0;text-align:center">
+        <img src="https://eve-research.com/eve-research-logo.png" alt="Eve Research" width="60" height="60" style="display:block;margin:0 auto;border-radius:12px" />
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0">
+        <p style="margin:0;font-size:16px;line-height:26px;color:#334155">Hi ${firstName(person)},</p>
+        <p style="margin:16px 0 0;font-size:16px;line-height:26px;color:#334155">
+          Based on what you told us, you may be a good fit for our study <strong style="color:#152b3e">${study.name}</strong>.${comp}
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0;text-align:center">
+        <a href="${link}" style="display:inline-block;background:#1f3d57;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none">I'm interested</a>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0">
+        <p style="margin:0;font-size:15px;line-height:24px;color:#334155">Thanks,<br/>Eve Research</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:16px 32px 0">
+        <p style="margin:0;font-size:12px;color:#94a3b8">Don't want these emails? <a href="${unsub}" style="color:#90a687">Unsubscribe</a>.</p>
+      </td>
+    </tr>
+  `);
   return { subject, html, text };
 }
 
@@ -44,26 +90,73 @@ export function welcome(
   bioUrl: string
 ): { subject: string; html: string; text: string } {
   const name = firstNameRaw?.trim() || "there";
-  const subject = "Welcome to Eve Research, a note from Dr. Lauren Hacker";
+  const subject = "Welcome to Eve Research — a note from Dr. Lauren Hacker";
   const text =
     `Hi ${name},\n\n` +
     `Thank you for adding your name to the Eve Research study list. I'm Dr. Lauren ` +
-    `Hacker, and I lead the eye-research studies here.\n\n` +
+    `Hacker, and I lead the eye-research studies here in Athens, Georgia.\n\n` +
+    `Here's what happens next:\n\n` +
     `When a study comes up that you may be a good fit for, I'll reach out personally ` +
-    `with the details and a link to choose a time that works for you. There's no ` +
-    `obligation, and you can opt out anytime.\n\n` +
+    `with the details. All studies are paid if you qualify, and there's no obligation ` +
+    `to take part. You can opt out anytime.\n\n` +
     `You can learn a little about me and Eve Research here: ${bioUrl}\n\n` +
-    `Warmly,\nDr. Lauren Hacker\nEve Research`;
-  const html =
-    `<p>Hi ${name},</p>` +
-    `<p>Thank you for adding your name to the Eve Research study list. I'm ` +
-    `Dr. Lauren Hacker, and I lead the eye-research studies here.</p>` +
-    `<p>When a study comes up that you may be a good fit for, I'll reach out ` +
-    `personally with the details and a link to choose a time that works for you. ` +
-    `There's no obligation, and you can opt out anytime.</p>` +
-    `<p>You can learn a little about me and Eve Research ` +
-    `<a href="${bioUrl}">here</a>.</p>` +
-    `<p>Warmly,<br/>Dr. Lauren Hacker<br/>Eve Research</p>`;
+    `Warmly,\nDr. Lauren Hacker, O.D.\nFounder, Eve Research`;
+  const html = emailLayout(`
+    <tr>
+      <td style="padding:32px 32px 0;text-align:center">
+        <img src="https://eve-research.com/eve-research-logo.png" alt="Eve Research" width="80" height="80" style="display:block;margin:0 auto;border-radius:16px" />
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0;text-align:center">
+        <h1 style="margin:0;font-family:Georgia,serif;font-size:24px;font-weight:700;color:#152b3e">Welcome to Eve Research</h1>
+        <p style="margin:6px 0 0;font-size:14px;color:#64748b">A personal note from Dr. Lauren Hacker</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0">
+        <p style="margin:0;font-size:16px;line-height:26px;color:#334155">Hi ${name},</p>
+        <p style="margin:16px 0 0;font-size:16px;line-height:26px;color:#334155">
+          Thank you for adding your name to the Eve Research study list. I'm Dr. Lauren
+          Hacker, and I lead the eye-research studies here in Athens, Georgia.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px 0">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f0f4ee;border-radius:12px">
+          <tr>
+            <td style="padding:20px 24px">
+              <p style="margin:0 0 4px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6f8767">What happens next</p>
+              <p style="margin:0;font-size:15px;line-height:24px;color:#334155">
+                When a study comes up that you may be a good fit for, I'll reach out
+                personally with the details. All studies are paid if you qualify, and
+                there is no obligation to take part. You can opt out anytime.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0;text-align:center">
+        <a href="${bioUrl}" style="display:inline-block;background:#1f3d57;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none">Learn about Eve Research</a>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:28px 32px 0">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="border-top:1px solid #e2e8f0;padding-top:20px">
+              <p style="margin:0;font-size:15px;line-height:24px;color:#334155">Warmly,</p>
+              <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:#152b3e">Dr. Lauren Hacker, O.D.</p>
+              <p style="margin:2px 0 0;font-size:13px;color:#64748b">Founder, Eve Research</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `);
   return { subject, html, text };
 }
 
@@ -103,21 +196,52 @@ export function preVisitEmail(
   );
   const text = textParts.join("\n");
 
-  const html =
-    `<p>Hi ${name},</p>` +
-    `<p>This is a friendly reminder about your upcoming visit for <strong>${study.name}</strong>.</p>` +
-    `<p style="font-size:16px"><strong>${visitName ? visitName + ": " : ""}${whenLabel}</strong></p>` +
-    (where
-      ? `<p><strong>Where:</strong> ${where}` +
-        (mapUrl ? ` &middot; <a href="${mapUrl}">Open map</a>` : "") +
-        `</p>`
-      : "") +
-    (prep ? `<p><strong>What to know:</strong> ${prep}</p>` : "") +
-    (study.compensation
-      ? `<p><strong>Compensation:</strong> ${study.compensation}</p>`
-      : "") +
-    `<p>If you can no longer make it, please reply to let us know.</p>` +
-    `<p>See you then,<br/>Dr. Lauren Hacker<br/>Eve Research</p>`;
+  const detailRows: string[] = [];
+  detailRows.push(`<tr><td style="padding:8px 0"><strong style="color:#152b3e">When:</strong> ${visitName ? visitName + " - " : ""}${whenLabel}</td></tr>`);
+  if (where) {
+    detailRows.push(`<tr><td style="padding:8px 0"><strong style="color:#152b3e">Where:</strong> ${where}${mapUrl ? ` &middot; <a href="${mapUrl}" style="color:#90a687">Open map</a>` : ""}</td></tr>`);
+  }
+  if (prep) {
+    detailRows.push(`<tr><td style="padding:8px 0"><strong style="color:#152b3e">What to know:</strong> ${prep}</td></tr>`);
+  }
+  if (study.compensation) {
+    detailRows.push(`<tr><td style="padding:8px 0"><strong style="color:#152b3e">Compensation:</strong> ${study.compensation}</td></tr>`);
+  }
+
+  const html = emailLayout(`
+    <tr>
+      <td style="padding:32px 32px 0;text-align:center">
+        <img src="https://eve-research.com/eve-research-logo.png" alt="Eve Research" width="60" height="60" style="display:block;margin:0 auto;border-radius:12px" />
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0">
+        <p style="margin:0;font-size:16px;line-height:26px;color:#334155">Hi ${name},</p>
+        <p style="margin:16px 0 0;font-size:16px;line-height:26px;color:#334155">
+          This is a friendly reminder about your upcoming visit for <strong style="color:#152b3e">${study.name}</strong>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px 0">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f0f4ee;border-radius:12px">
+          <tr>
+            <td style="padding:16px 20px">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:15px;line-height:22px;color:#334155">
+                ${detailRows.join("")}
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0">
+        <p style="margin:0;font-size:15px;line-height:24px;color:#334155">If you can no longer make it, please reply to let us know.</p>
+        <p style="margin:16px 0 0;font-size:15px;line-height:24px;color:#334155">See you then,<br/><strong style="color:#152b3e">Dr. Lauren Hacker</strong><br/><span style="color:#64748b">Eve Research</span></p>
+      </td>
+    </tr>
+  `);
 
   return { subject, html, text };
 }
@@ -134,11 +258,42 @@ export function bookingConfirmation(
   const text =
     `Hi ${firstName(person)},\n\nYou're booked for "${study.name}". Here are your visit times:\n` +
     `${listText}${where}\n\nThank you,\nEve Research`;
-  const html =
-    `<p>Hi ${firstName(person)},</p>` +
-    `<p>You're booked for <strong>${study.name}</strong>. Your visit times:</p>` +
-    `<ul>${listHtml}</ul>` +
-    (study.location ? `<p>Location: ${study.location}</p>` : "") +
-    `<p>Thank you,<br/>Eve Research</p>`;
+  const html = emailLayout(`
+    <tr>
+      <td style="padding:32px 32px 0;text-align:center">
+        <img src="https://eve-research.com/eve-research-logo.png" alt="Eve Research" width="60" height="60" style="display:block;margin:0 auto;border-radius:12px" />
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0;text-align:center">
+        <h1 style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#152b3e">You're booked!</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px 0">
+        <p style="margin:0;font-size:16px;line-height:26px;color:#334155">
+          Hi ${firstName(person)}, you're confirmed for <strong style="color:#152b3e">${study.name}</strong>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px 0">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f0f4ee;border-radius:12px">
+          <tr>
+            <td style="padding:16px 20px">
+              <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6f8767">Your visit times</p>
+              <ul style="margin:0;padding:0 0 0 18px;font-size:15px;line-height:26px;color:#334155">${listHtml}</ul>
+              ${study.location ? `<p style="margin:12px 0 0;font-size:14px;color:#64748b">Location: ${study.location}</p>` : ""}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px 0">
+        <p style="margin:0;font-size:15px;line-height:24px;color:#334155">Thank you,<br/><strong style="color:#152b3e">Eve Research</strong></p>
+      </td>
+    </tr>
+  `);
   return { subject, html, text };
 }
