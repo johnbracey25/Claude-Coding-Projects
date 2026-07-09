@@ -38,7 +38,6 @@ export const PERSON_FIELDS: FieldDef[] = [
   { key: "source", label: "Source", type: "text", aliases: ["source", "origin", "referral"] },
   { key: "notes", label: "Notes", type: "text", aliases: ["notes", "comments", "comment"] },
   { key: "email_opt_in", label: "Email opt-in", type: "boolean", aliases: ["email opt in", "email opt-in", "email consent"] },
-  { key: "sms_opt_in", label: "SMS opt-in", type: "boolean", aliases: ["sms opt in", "sms opt-in", "text consent", "text opt in"] },
   { key: "is_repeat_participant", label: "Repeat participant", type: "boolean", aliases: ["repeat participant", "repeat", "returning", "previous participant", "prior participant", "past participant"], help: "Has taken part in a previous study" },
 ];
 

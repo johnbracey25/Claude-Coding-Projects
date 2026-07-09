@@ -39,7 +39,6 @@ export async function savePerson(formData: FormData) {
     date_of_birth: normalizeDate((formData.get("date_of_birth") as string) ?? ""),
     status: (str(formData.get("status")) as PersonStatus) ?? "active",
     email_opt_in: formData.get("email_opt_in") === "on",
-    sms_opt_in: formData.get("sms_opt_in") === "on",
     is_repeat_participant: formData.get("is_repeat_participant") === "on",
     had_cataract_surgery:
       cataract === "yes" ? true : cataract === "no" ? false : null,

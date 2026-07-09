@@ -1,6 +1,6 @@
 import AdminNav from "@/components/AdminNav";
 import SetupNotice from "@/components/SetupNotice";
-import { isSupabaseConfigured, isSmsConfigured, isEmailConfigured } from "@/lib/config";
+import { isSupabaseConfigured, isEmailConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/format";
 import type { Message } from "@/lib/types";
@@ -47,13 +47,6 @@ export default async function MessagesPage() {
         </p>
 
         <div className="mt-3 flex flex-wrap gap-2 text-xs">
-          <span
-            className={`rounded-full px-2 py-0.5 ${
-              isSmsConfigured ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-            }`}
-          >
-            SMS: {isSmsConfigured ? "configured" : "not configured"}
-          </span>
           <span
             className={`rounded-full px-2 py-0.5 ${
               isEmailConfigured ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"

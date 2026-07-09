@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/config";
-import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
+import { sendEmail } from "@/lib/messaging";
 import { createCalendarEvent, getLaurenBusy } from "@/lib/google";
 import { bookingConfirmation } from "@/lib/templates";
 import { formatDateTime } from "@/lib/format";
@@ -175,16 +175,10 @@ export async function POST(req: NextRequest) {
     (r) => `${r.visit_name}: ${formatDateTime(r.starts_at)}`
   );
   const tpl = bookingConfirmation(person, study, visitLines);
-  const channel = chooseChannel({
-    email: person.email,
-    phone: person.phone,
-    emailOptIn: person.email_opt_in,
-    smsOptIn: person.sms_opt_in,
-  });
-  try {
-    if (channel === "email") {
+  if (person.email && person.email_opt_in) {
+    try {
       const r = await sendEmail({
-        to: person.email!,
+        to: person.email,
         subject: tpl.subject,
         html: tpl.html,
         text: tpl.text,
@@ -199,20 +193,9 @@ export async function POST(req: NextRequest) {
         provider_id: r.providerId ?? null,
         error: r.error ?? null,
       });
-    } else if (channel === "sms") {
-      const r = await sendSms({ to: person.phone!, body: tpl.sms });
-      await supabase.from("messages").insert({
-        person_id: person.id,
-        candidate_id: cand.id,
-        channel: "sms",
-        body: tpl.sms,
-        status: r.ok ? "sent" : r.skipped ? "skipped" : "failed",
-        provider_id: r.providerId ?? null,
-        error: r.error ?? null,
-      });
+    } catch {
+      // Confirmation failure shouldn't fail the booking.
     }
-  } catch {
-    // Confirmation failure shouldn't fail the booking.
   }
 
   return NextResponse.json({ ok: true, booked: rows.length });

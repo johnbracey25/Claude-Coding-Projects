@@ -110,14 +110,6 @@ export default function PersonForm({ person }: { person?: Person }) {
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input
             type="checkbox"
-            name="sms_opt_in"
-            defaultChecked={person ? person.sms_opt_in : true}
-          />
-          SMS opt-in
-        </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input
-            type="checkbox"
             name="is_repeat_participant"
             defaultChecked={person ? person.is_repeat_participant : false}
           />

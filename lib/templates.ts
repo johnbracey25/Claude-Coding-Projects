@@ -1,12 +1,6 @@
 import { appUrl } from "./config";
 import type { Person, Study, Candidate } from "./types";
 
-/**
- * Invite message templates. Each invite links to a public response page
- * (/r/<token>) where the person says whether they're interested. Keep copy
- * short and friendly — SMS especially.
- */
-
 export function responseUrl(candidate: Pick<Candidate, "token">): string {
   return `${appUrl}/r/${candidate.token}`;
 }
@@ -39,28 +33,16 @@ export function inviteEmail(
   const html =
     `<p>Hi ${firstName(person)},</p>` +
     `<p>Based on what you told us, you may be a good fit for our study <strong>${study.name}</strong>.${comp}</p>` +
-    `<p><a href="${link}" style="display:inline-block;background:#0f766e;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">I'm interested →</a></p>` +
+    `<p><a href="${link}" style="display:inline-block;background:#0f766e;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">I'm interested &rarr;</a></p>` +
     `<p>Thanks,<br/>Eve Research</p>` +
     `<p style="color:#94a3b8;font-size:12px">Don't want these emails? <a href="${unsub}">Unsubscribe</a>.</p>`;
   return { subject, html, text };
 }
 
-export function inviteSms(
-  person: Person,
-  study: Study,
-  candidate: Candidate
-): string {
-  const link = responseUrl(candidate);
-  return (
-    `Hi ${firstName(person)}, it's Eve Research. You may qualify for our study "${study.name}". ` +
-    `Interested? ${link} (Reply STOP to opt out)`
-  );
-}
-
 export function welcome(
   firstNameRaw: string,
   bioUrl: string
-): { subject: string; html: string; text: string; sms: string } {
+): { subject: string; html: string; text: string } {
   const name = firstNameRaw?.trim() || "there";
   const subject = "Welcome to Eve Research, a note from Dr. Lauren Hacker";
   const text =
@@ -82,17 +64,9 @@ export function welcome(
     `<p>You can learn a little about me and Eve Research ` +
     `<a href="${bioUrl}">here</a>.</p>` +
     `<p>Warmly,<br/>Dr. Lauren Hacker<br/>Eve Research</p>`;
-  const sms =
-    `Hi ${name}, this is Dr. Lauren Hacker with Eve Research. Thank you for joining ` +
-    `our study list! When a study you may be a good fit for comes up, I'll reach out ` +
-    `personally. A little about me and our work: ${bioUrl}. Reply STOP to opt out.`;
-  return { subject, html, text, sms };
+  return { subject, html, text };
 }
 
-/**
- * Day-before pre-visit email: the details packet (address + map, what to bring,
- * study info). Rich content, so it goes by email.
- */
 export function preVisitEmail(
   person: Person,
   study: Study,
@@ -152,7 +126,7 @@ export function bookingConfirmation(
   person: Person,
   study: Study,
   visitLines: string[]
-): { subject: string; html: string; text: string; sms: string } {
+): { subject: string; html: string; text: string } {
   const subject = `Your ${study.name} visit is booked`;
   const listText = visitLines.map((l) => `  - ${l}`).join("\n");
   const listHtml = visitLines.map((l) => `<li>${l}</li>`).join("");
@@ -166,9 +140,5 @@ export function bookingConfirmation(
     `<ul>${listHtml}</ul>` +
     (study.location ? `<p>Location: ${study.location}</p>` : "") +
     `<p>Thank you,<br/>Eve Research</p>`;
-  const sms =
-    `Eve Research: you're booked for "${study.name}". ` +
-    visitLines.join("; ") +
-    (study.location ? ` at ${study.location}` : "");
-  return { subject, html, text, sms };
+  return { subject, html, text };
 }

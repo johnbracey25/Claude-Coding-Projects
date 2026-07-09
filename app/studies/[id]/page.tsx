@@ -6,7 +6,7 @@ import { isSupabaseConfigured } from "@/lib/config";
 import { getStudy, listCandidates } from "@/lib/studies";
 import { describeRule, type Rule } from "@/lib/eligibility";
 import { runMatchingAction, inviteAllEligible } from "../actions";
-import { isEmailConfigured, isSmsConfigured } from "@/lib/config";
+import { isEmailConfigured } from "@/lib/config";
 import CandidatesTable from "@/components/CandidatesTable";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +34,7 @@ export default async function StudyDetailPage({
   const rules = (study.eligibility_rules?.all ?? []) as Rule[];
   const visits = study.visit_plan?.visits ?? [];
   const eligibleCount = candidates.filter((c) => c.status === "eligible").length;
-  const messagingReady = isEmailConfigured || isSmsConfigured;
+  const messagingReady = isEmailConfigured;
 
   return (
     <>
@@ -128,8 +128,8 @@ export default async function StudyDetailPage({
 
         {!messagingReady && (
           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            Email/SMS aren&apos;t configured yet, so invites will be logged as
-            &quot;skipped&quot; until you add Resend / Twilio keys. Everything else works.
+            Email isn&apos;t configured yet, so invites will be logged as
+            &quot;skipped&quot; until you add email credentials. Everything else works.
           </p>
         )}
 

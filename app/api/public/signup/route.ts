@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured, appUrl } from "@/lib/config";
 import { normalizePhone, normalizeDate } from "@/lib/people-fields";
-import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
+import { sendEmail } from "@/lib/messaging";
 import { welcome } from "@/lib/templates";
 import type { PersonInput } from "@/lib/types";
 
@@ -134,7 +134,6 @@ export async function POST(req: NextRequest) {
     tags,
     notes: (body.notes ?? "").trim() || null,
     email_opt_in: true,
-    sms_opt_in: !!phone,
     consent_to_contact: true,
     status: "active",
     source,
@@ -184,7 +183,6 @@ export async function POST(req: NextRequest) {
         notes: values.notes,
         // Always refresh consent/opt-in and signup metadata.
         email_opt_in: true,
-        sms_opt_in: !!phone,
         consent_to_contact: true,
         status: "active",
         source,
@@ -219,42 +217,24 @@ export async function POST(req: NextRequest) {
 
   // Send a personal welcome from Dr. Hacker on brand-new signups (best-effort;
   // never fails the signup). Repeat submissions don't re-trigger it.
-  if (isNewSignup) {
-    const channel = chooseChannel({
-      email,
-      phone,
-      emailOptIn: true,
-      smsOptIn: !!phone,
-    });
+  if (isNewSignup && email) {
     const tpl = welcome(first, `${appUrl}/about`);
     try {
-      if (channel === "email" && email) {
-        const r = await sendEmail({
-          to: email,
-          subject: tpl.subject,
-          html: tpl.html,
-          text: tpl.text,
-        });
-        await supabase.from("messages").insert({
-          person_id: personId,
-          channel: "email",
-          subject: tpl.subject,
-          body: tpl.text,
-          status: r.ok ? "sent" : r.skipped ? "skipped" : "failed",
-          provider_id: r.providerId ?? null,
-          error: r.error ?? null,
-        });
-      } else if (channel === "sms" && phone) {
-        const r = await sendSms({ to: phone, body: tpl.sms });
-        await supabase.from("messages").insert({
-          person_id: personId,
-          channel: "sms",
-          body: tpl.sms,
-          status: r.ok ? "sent" : r.skipped ? "skipped" : "failed",
-          provider_id: r.providerId ?? null,
-          error: r.error ?? null,
-        });
-      }
+      const r = await sendEmail({
+        to: email,
+        subject: tpl.subject,
+        html: tpl.html,
+        text: tpl.text,
+      });
+      await supabase.from("messages").insert({
+        person_id: personId,
+        channel: "email",
+        subject: tpl.subject,
+        body: tpl.text,
+        status: r.ok ? "sent" : r.skipped ? "skipped" : "failed",
+        provider_id: r.providerId ?? null,
+        error: r.error ?? null,
+      });
     } catch {
       // Welcome message failure must not affect the signup result.
     }

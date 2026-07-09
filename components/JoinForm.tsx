@@ -189,8 +189,8 @@ export default function JoinForm() {
       <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-8 text-center">
         <h2 className="text-xl font-bold text-emerald-800">You&apos;re on the list! 🎉</h2>
         <p className="mt-2 text-emerald-700">
-          Thanks for your interest in Eve Research. We&apos;ll reach out by email or
-          text when there&apos;s a study you may be a good fit for.
+          Thanks for your interest in Eve Research. We&apos;ll reach out by email
+          when there&apos;s a study you may be a good fit for.
         </p>
       </div>
     );
