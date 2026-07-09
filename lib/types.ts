@@ -119,7 +119,7 @@ export interface Message {
   id: string;
   person_id: string | null;
   candidate_id: string | null;
-  channel: "email" | "sms";
+  channel: "email";
   direction: "outbound" | "inbound";
   subject: string | null;
   body: string | null;

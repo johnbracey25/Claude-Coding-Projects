@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/candidates", label: "Candidates" },
   { href: "/calendar", label: "Calendar" },
   { href: "/messages", label: "Messages" },
+  { href: "/settings/mfa", label: "Settings" },
 ];
 
 export default function AdminNav() {

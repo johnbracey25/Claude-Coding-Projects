@@ -15,6 +15,18 @@ export async function signIn(formData: FormData) {
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
+
+  const { data: aalData } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  if (
+    aalData &&
+    aalData.nextLevel === "aal2" &&
+    aalData.currentLevel !== "aal2"
+  ) {
+    redirect(`/login/verify?next=${encodeURIComponent(next)}`);
+  }
+
   revalidatePath("/", "layout");
   redirect(next.startsWith("/") ? next : "/dashboard");
 }

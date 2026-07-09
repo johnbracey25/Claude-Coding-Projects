@@ -23,12 +23,6 @@ function isPublic(pathname: string): boolean {
   );
 }
 
-/**
- * Refreshes the Supabase auth session on every request and gates the internal
- * (staff) routes. Public participant routes (/join, /book, …) are always open.
- * No-ops when Supabase isn't configured yet so the app still renders setup
- * notices during initial setup.
- */
 export async function updateSession(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -70,6 +64,17 @@ export async function updateSession(request: NextRequest) {
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  if (user && !isPublic(request.nextUrl.pathname)) {
+    const { data: aal } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login/verify";
+      redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return response;

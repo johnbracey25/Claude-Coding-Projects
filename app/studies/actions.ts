@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { runMatching } from "@/lib/studies";
-import { sendEmail, sendSms, chooseChannel } from "@/lib/messaging";
-import { inviteEmail, inviteSms } from "@/lib/templates";
+import { sendEmail } from "@/lib/messaging";
+import { inviteEmail } from "@/lib/templates";
 import type { StudyStatus, Person, Study, Candidate } from "@/lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -81,8 +81,8 @@ interface CandidateJoined extends Candidate {
 }
 
 /**
- * Invite one candidate: pick a channel (email if they have/allow it, else SMS),
- * send the invite, log it, and advance status to 'invited' on success.
+ * Invite one candidate: send the invite email, log it, and advance status to
+ * 'invited' on success.
  */
 async function inviteOne(
   supabase: SupabaseClient,
@@ -97,50 +97,32 @@ async function inviteOne(
   const cand = data as unknown as CandidateJoined;
   const { person, study } = cand;
 
-  const channel = chooseChannel({
-    email: person.email,
-    phone: person.phone,
-    emailOptIn: person.email_opt_in,
-    smsOptIn: person.sms_opt_in,
-  });
-
-  let result;
-  let subject: string | null = null;
-  let body: string | null = null;
-
-  if (channel === "email") {
-    const tpl = inviteEmail(person, study, cand);
-    subject = tpl.subject;
-    body = tpl.text;
-    result = await sendEmail({
-      to: person.email!,
-      subject: tpl.subject,
-      html: tpl.html,
-      text: tpl.text,
-    });
-  } else if (channel === "sms") {
-    body = inviteSms(person, study, cand);
-    result = await sendSms({ to: person.phone!, body });
-  }
-
-  if (!channel || !result) {
+  if (!person.email || !person.email_opt_in) {
     await supabase.from("messages").insert({
       person_id: person.id,
       candidate_id: cand.id,
       channel: "email",
       status: "skipped",
-      error: "No contactable channel (missing contact info or opt-out).",
+      error: "No email address or email opt-out.",
     });
     return "skipped";
   }
+
+  const tpl = inviteEmail(person, study, cand);
+  const result = await sendEmail({
+    to: person.email,
+    subject: tpl.subject,
+    html: tpl.html,
+    text: tpl.text,
+  });
 
   const status = result.ok ? "sent" : result.skipped ? "skipped" : "failed";
   await supabase.from("messages").insert({
     person_id: person.id,
     candidate_id: cand.id,
-    channel,
-    subject,
-    body,
+    channel: "email",
+    subject: tpl.subject,
+    body: tpl.text,
     status,
     provider_id: result.providerId ?? null,
     error: result.error ?? null,
@@ -236,7 +218,6 @@ export async function setCandidateStatus(formData: FormData) {
     .single();
   if (error) throw new Error(error.message);
 
-  // Completing a study makes them a repeat participant for future matching.
   if (status === "completed" && cand?.person_id) {
     await supabase
       .from("people")

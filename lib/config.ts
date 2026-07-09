@@ -22,11 +22,6 @@ export const isSmtpConfigured =
 
 export const isEmailConfigured = isResendConfigured || isSmtpConfigured;
 
-export const isSmsConfigured =
-  !!process.env.TWILIO_ACCOUNT_SID &&
-  !!process.env.TWILIO_AUTH_TOKEN &&
-  !!process.env.TWILIO_FROM_NUMBER;
-
 // Two-way Google Calendar (service account writes bookings onto the calendar).
 // Credentials can be supplied either as the whole service-account JSON in
 // GOOGLE_SERVICE_ACCOUNT_JSON (easiest — paste the downloaded file), or as
