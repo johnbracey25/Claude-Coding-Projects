@@ -8,6 +8,7 @@ import { describeRule, type Rule } from "@/lib/eligibility";
 import { runMatchingAction, inviteAllEligible } from "../actions";
 import { isEmailConfigured } from "@/lib/config";
 import CandidatesTable from "@/components/CandidatesTable";
+import DeleteStudyButton from "@/components/DeleteStudyButton";
 
 export const dynamic = "force-dynamic";
 
@@ -51,12 +52,15 @@ export default async function StudyDetailPage({
                 : ""}
             </p>
           </div>
-          <Link
-            href={`/studies/${study.id}/edit`}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </Link>
+          <div className="flex flex-none gap-2">
+            <Link
+              href={`/studies/${study.id}/edit`}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Edit
+            </Link>
+            <DeleteStudyButton id={study.id} name={study.name} />
+          </div>
         </div>
 
         {study.description && (

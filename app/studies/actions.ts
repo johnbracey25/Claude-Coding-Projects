@@ -89,6 +89,20 @@ export async function saveStudy(formData: FormData) {
   redirect(`/studies/${studyId}`);
 }
 
+/**
+ * Permanently delete a study. Candidate matches and appointments for it are
+ * removed too (FK cascade); sent-message history is kept but unlinked.
+ */
+export async function deleteStudy(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const supabase = createClient();
+  const { error } = await supabase.from("studies").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/studies");
+  redirect("/studies");
+}
+
 /** Run eligibility matching for a study, then refresh its page. */
 export async function runMatchingAction(formData: FormData) {
   const studyId = String(formData.get("study_id") ?? "");
