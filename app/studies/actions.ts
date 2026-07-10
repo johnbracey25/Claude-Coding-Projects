@@ -60,20 +60,29 @@ export async function saveStudy(formData: FormData) {
   const supabase = createClient();
 
   if (id) {
-    const { error } = await supabase.from("studies").update(values).eq("id", id);
-    if (error) throw new Error(error.message);
+    let { error } = await supabase.from("studies").update(values).eq("id", id);
+    if (error) {
+      const { calendar_feed_ids: _, ...fallback } = values;
+      const retry = await supabase.from("studies").update(fallback).eq("id", id);
+      if (retry.error) throw new Error(retry.error.message);
+    }
     revalidatePath(`/studies/${id}`);
     revalidatePath("/studies");
     redirect(`/studies/${id}`);
   } else {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("studies")
       .insert(values)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      const { calendar_feed_ids: _, ...fallback } = values;
+      const retry = await supabase.from("studies").insert(fallback).select("id").single();
+      if (retry.error) throw new Error(retry.error.message);
+      data = retry.data;
+    }
     revalidatePath("/studies");
-    redirect(`/studies/${data.id}`);
+    redirect(`/studies/${data!.id}`);
   }
 }
 
