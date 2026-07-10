@@ -56,6 +56,15 @@ export async function toggleFeed(formData: FormData) {
 export async function syncNow() {
   await syncAllFeeds();
   revalidatePath("/calendar");
+  revalidatePath("/calendar/setup");
+}
+
+/** Sync and return per-feed results so the UI can report what happened. */
+export async function runSync() {
+  const result = await syncAllFeeds();
+  revalidatePath("/calendar");
+  revalidatePath("/calendar/setup");
+  return result;
 }
 
 export async function generateInviteLink(): Promise<string> {
