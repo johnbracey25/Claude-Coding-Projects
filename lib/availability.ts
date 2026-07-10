@@ -17,6 +17,7 @@ export const DAY_OPTIONS = [
   { key: "wed", label: "Wednesday", short: "Wed" },
   { key: "thu", label: "Thursday", short: "Thu" },
   { key: "fri", label: "Friday", short: "Fri" },
+  { key: "sat", label: "Saturday", short: "Sat" },
 ] as const;
 
 export const TIME_KEYS = TIME_OPTIONS.map((t) => t.key) as readonly string[];
