@@ -73,20 +73,23 @@ export default async function PeoplePage({
                   : "No people yet. Import your contact CSV to get started."}
               </p>
             ) : (
-              <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white">
                 <table className="w-full text-left text-sm">
                   <thead className="border-b border-slate-200 bg-slate-50 text-slate-500">
                     <tr>
                       <th className="px-4 py-2 font-medium">Name</th>
                       <th className="px-4 py-2 font-medium">Email</th>
                       <th className="px-4 py-2 font-medium">Phone</th>
+                      <th className="px-4 py-2 font-medium">DOB</th>
+                      <th className="px-4 py-2 font-medium">Eye info</th>
+                      <th className="px-4 py-2 font-medium">Source</th>
                       <th className="px-4 py-2 font-medium">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {people.map((p) => (
                       <tr key={p.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-2">
+                        <td className="whitespace-nowrap px-4 py-2">
                           <Link
                             href={`/people/${p.id}`}
                             className="font-medium text-brand-dark hover:underline"
@@ -102,7 +105,12 @@ export default async function PeoplePage({
                           )}
                         </td>
                         <td className="px-4 py-2 text-slate-600">{p.email ?? "-"}</td>
-                        <td className="px-4 py-2 text-slate-600">{p.phone ?? "-"}</td>
+                        <td className="whitespace-nowrap px-4 py-2 text-slate-600">{p.phone ?? "-"}</td>
+                        <td className="whitespace-nowrap px-4 py-2 text-slate-600">{p.date_of_birth ?? "-"}</td>
+                        <td className="px-4 py-2 text-slate-600">
+                          <EyeSummary person={p} />
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-2 text-slate-600">{p.source ?? "-"}</td>
                         <td className="px-4 py-2">
                           <StatusBadge status={p.status} />
                         </td>
@@ -121,6 +129,19 @@ export default async function PeoplePage({
         )}
       </main>
     </>
+  );
+}
+
+function EyeSummary({ person: p }: { person: Person }) {
+  const parts: string[] = [];
+  if (p.had_cataract_surgery) parts.push("Cataract surg.");
+  if (p.eye_conditions?.length) parts.push(p.eye_conditions.join(", "));
+  if (p.contact_rx) parts.push("Rx on file");
+  if (!parts.length) return <span className="text-slate-400">-</span>;
+  return (
+    <span className="max-w-[12rem] truncate block" title={parts.join(" · ")}>
+      {parts.join(" · ")}
+    </span>
   );
 }
 

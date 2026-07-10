@@ -6,6 +6,16 @@ import { createClient } from "@/lib/supabase/server";
 import { normalizePhone, normalizeDate } from "@/lib/people-fields";
 import type { PersonInput, PersonStatus } from "@/lib/types";
 
+export async function deletePerson(formData: FormData) {
+  const id = (formData.get("id") as string)?.trim();
+  if (!id) throw new Error("Missing person id");
+  const supabase = createClient();
+  const { error } = await supabase.from("people").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/people");
+  redirect("/people");
+}
+
 /** Split a comma/semicolon list into a clean string array. */
 function toArray(v: FormDataEntryValue | null): string[] {
   const s = (v as string) ?? "";
