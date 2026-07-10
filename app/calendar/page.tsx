@@ -2,7 +2,7 @@ import AdminNav from "@/components/AdminNav";
 import SetupNotice from "@/components/SetupNotice";
 import { isSupabaseConfigured, appUrl } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
-import { addFeed, removeFeed, syncNow, getInviteCode } from "./actions";
+import { addFeed, removeFeed, updateFeedKeyword, syncNow, getInviteCode } from "./actions";
 import CalendarWeekView from "@/components/CalendarWeekView";
 import CalendarInviteLink from "@/components/CalendarInviteLink";
 
@@ -115,28 +115,49 @@ export default async function CalendarPage() {
           ) : (
             <ul className="mt-3 divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
               {feedList.map((f) => (
-                <li key={f.id} className="flex items-center gap-3 px-4 py-3">
-                  <span
-                    className="h-3 w-3 flex-none rounded-full"
-                    style={{ backgroundColor: f.color }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-800">{f.name}</p>
-                    <p className="text-xs text-slate-400 truncate">
-                      {f.last_synced_at
-                        ? `Last synced ${new Date(f.last_synced_at).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
-                        : "Not synced yet"}
-                      {f.last_error && (
-                        <span className="ml-2 text-rose-500">
-                          Error: {f.last_error}
-                        </span>
-                      )}
-                    </p>
+                <li key={f.id} className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="h-3 w-3 flex-none rounded-full"
+                      style={{ backgroundColor: f.color }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800">{f.name}</p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {f.last_synced_at
+                          ? `Last synced ${new Date(f.last_synced_at).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                          : "Not synced yet"}
+                        {f.last_error && (
+                          <span className="ml-2 text-rose-500">
+                            Error: {f.last_error}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <form action={removeFeed}>
+                      <input type="hidden" name="id" value={f.id} />
+                      <button className="text-xs text-rose-500 hover:underline">
+                        Remove
+                      </button>
+                    </form>
                   </div>
-                  <form action={removeFeed}>
+                  <form
+                    action={updateFeedKeyword}
+                    className="mt-2 flex items-center gap-2 pl-6"
+                  >
                     <input type="hidden" name="id" value={f.id} />
-                    <button className="text-xs text-rose-500 hover:underline">
-                      Remove
+                    <span className="text-xs text-slate-500">Keyword filter:</span>
+                    <input
+                      name="keyword"
+                      defaultValue={f.keyword ?? ""}
+                      placeholder="e.g. Available (blank = all events)"
+                      className="flex-1 rounded border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-brand focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Save
                     </button>
                   </form>
                 </li>

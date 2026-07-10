@@ -27,6 +27,15 @@ export async function addFeed(formData: FormData) {
   revalidatePath("/calendar");
 }
 
+export async function updateFeedKeyword(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const keyword = String(formData.get("keyword") ?? "").trim() || null;
+  if (!id) return;
+  const supabase = createClient();
+  await supabase.from("calendar_feeds").update({ keyword }).eq("id", id);
+  revalidatePath("/calendar");
+}
+
 export async function removeFeed(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
