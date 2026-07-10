@@ -5,6 +5,7 @@ import StudyForm from "@/components/StudyForm";
 import SetupNotice from "@/components/SetupNotice";
 import { isSupabaseConfigured } from "@/lib/config";
 import { getStudy } from "@/lib/studies";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,14 @@ export default async function EditStudyPage({
   const study = await getStudy(params.id);
   if (!study) notFound();
 
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("calendar_feeds")
+    .select("id, name, color")
+    .eq("enabled", true)
+    .order("created_at");
+  const feeds = data ?? [];
+
   return (
     <>
       <AdminNav />
@@ -34,10 +43,10 @@ export default async function EditStudyPage({
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-slate-900">Edit study</h1>
           <Link href={`/studies/${study.id}`} className="text-sm text-brand-dark hover:underline">
-            ← Back
+            Back
           </Link>
         </div>
-        <StudyForm study={study} />
+        <StudyForm study={study} calendarFeeds={feeds} />
       </main>
     </>
   );

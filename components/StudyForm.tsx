@@ -50,9 +50,30 @@ function visitsFromStudy(study?: Study): VisitDef[] {
   ).map((v) => ({ ...v }));
 }
 
-export default function StudyForm({ study }: { study?: Study }) {
+interface CalFeed {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export default function StudyForm({
+  study,
+  calendarFeeds = [],
+}: {
+  study?: Study;
+  calendarFeeds?: CalFeed[];
+}) {
   const [rules, setRules] = useState<RuleRow[]>(rulesFromStudy(study));
   const [visits, setVisits] = useState<VisitDef[]>(visitsFromStudy(study));
+  const [selectedFeeds, setSelectedFeeds] = useState<string[]>(
+    study?.calendar_feed_ids ?? []
+  );
+
+  function toggleFeed(id: string) {
+    setSelectedFeeds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
 
   function addRule() {
     setRules([...rules, { field: "age", op: "between", value: "40", value2: "70" }]);
@@ -102,6 +123,7 @@ export default function StudyForm({ study }: { study?: Study }) {
       {study && <input type="hidden" name="id" value={study.id} />}
       <input type="hidden" name="rules_json" value={rulesJson} />
       <input type="hidden" name="visits_json" value={visitsJson} />
+      <input type="hidden" name="calendar_feed_ids" value={JSON.stringify(selectedFeeds)} />
 
       {/* Basics */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -314,6 +336,44 @@ export default function StudyForm({ study }: { study?: Study }) {
           + Add visit
         </button>
       </fieldset>
+
+      {/* Calendar feeds */}
+      {calendarFeeds.length > 0 && (
+        <fieldset className="rounded-xl border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-semibold text-slate-600">
+            Calendars for this study
+          </legend>
+          <p className="text-sm text-slate-500">
+            Choose whose calendars to check for availability when scheduling
+            this study.
+          </p>
+          <div className="mt-3 space-y-2">
+            {calendarFeeds.map((f) => (
+              <label
+                key={f.id}
+                className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                <input
+                  type="checkbox"
+                  className="h-4 w-4"
+                  checked={selectedFeeds.includes(f.id)}
+                  onChange={() => toggleFeed(f.id)}
+                />
+                <span
+                  className="h-3 w-3 flex-none rounded-full"
+                  style={{ backgroundColor: f.color }}
+                />
+                <span className="font-medium">{f.name}</span>
+              </label>
+            ))}
+          </div>
+          {calendarFeeds.length === 0 && (
+            <p className="mt-2 text-xs text-slate-400">
+              No calendars connected yet. Add them on the Calendar page first.
+            </p>
+          )}
+        </fieldset>
+      )}
 
       <button type="submit" className="rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-dark">
         {study ? "Save study" : "Create study"}

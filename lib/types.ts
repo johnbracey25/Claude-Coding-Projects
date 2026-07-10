@@ -62,6 +62,7 @@ export interface Study {
   prep_instructions: string | null;
   buffer_min: number;
   min_lead_hours: number;
+  calendar_feed_ids: string[];
   created_at: string;
   updated_at: string;
 }

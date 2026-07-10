@@ -31,6 +31,15 @@ export async function saveStudy(formData: FormData) {
     /* keep default */
   }
 
+  let calendar_feed_ids: string[] = [];
+  try {
+    calendar_feed_ids = JSON.parse(
+      String(formData.get("calendar_feed_ids") ?? "[]")
+    );
+  } catch {
+    /* keep default */
+  }
+
   const values = {
     name: str(formData.get("name")) ?? "Untitled study",
     description: str(formData.get("description")),
@@ -45,6 +54,7 @@ export async function saveStudy(formData: FormData) {
     min_lead_hours: Number(formData.get("min_lead_hours") ?? 0) || 0,
     eligibility_rules,
     visit_plan,
+    calendar_feed_ids,
   };
 
   const supabase = createClient();
