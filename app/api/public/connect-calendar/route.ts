@@ -5,6 +5,12 @@ import { getSetting } from "@/lib/settings";
 import { syncFeed } from "@/lib/calendar-sync";
 
 const COLORS = ["#6f8767", "#4a90d9", "#d97556", "#8b6fb0", "#5a9e9e"];
+const PINK = "#d9568a";
+
+function isLauren(name: string): boolean {
+  const lower = name.toLowerCase();
+  return lower.includes("lauren") || lower.includes("hacker") || lower.includes("bracey");
+}
 
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured) {
@@ -87,11 +93,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Pick a color based on how many feeds exist already.
-  const { count } = await supabase
-    .from("calendar_feeds")
-    .select("id", { count: "exact", head: true });
-  const color = COLORS[(count ?? 0) % COLORS.length];
+  // Lauren gets pink; everyone else rotates through the palette.
+  let color: string;
+  if (isLauren(name)) {
+    color = PINK;
+  } else {
+    const { count } = await supabase
+      .from("calendar_feeds")
+      .select("id", { count: "exact", head: true });
+    color = COLORS[(count ?? 0) % COLORS.length];
+  }
 
   const { data: feed, error: insertErr } = await supabase
     .from("calendar_feeds")
