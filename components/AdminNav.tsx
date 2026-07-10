@@ -5,7 +5,6 @@ const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/people", label: "People" },
   { href: "/studies", label: "Studies" },
-  { href: "/candidates", label: "Candidates" },
   { href: "/calendar", label: "Calendar" },
   { href: "/messages", label: "Messages" },
   { href: "/settings/mfa", label: "Settings" },
