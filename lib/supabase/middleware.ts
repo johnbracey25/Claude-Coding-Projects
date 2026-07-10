@@ -13,7 +13,6 @@ const PUBLIC_PREFIXES = [
   "/api/webhooks",
   "/api/unsubscribe",
   "/api/cron",
-  "/api/test-email",
   "/auth",
 ];
 
