@@ -73,15 +73,21 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (!email && !phone) {
+  if (!email) {
     return NextResponse.json(
-      { error: "Please provide an email or phone number so we can reach you." },
+      { error: "Please enter your email address." },
       { status: 400 }
     );
   }
-  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return NextResponse.json(
       { error: "That email address doesn't look right." },
+      { status: 400 }
+    );
+  }
+  if (!phone) {
+    return NextResponse.json(
+      { error: "Please enter your mobile phone number." },
       { status: 400 }
     );
   }

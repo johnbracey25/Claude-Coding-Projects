@@ -240,6 +240,7 @@ export default function JoinForm() {
         <input
           name="email"
           type="email"
+          required
           inputMode="email"
           autoComplete="email"
           autoCapitalize="off"
@@ -254,14 +255,12 @@ export default function JoinForm() {
         <input
           name="phone"
           type="tel"
+          required
           inputMode="tel"
           autoComplete="tel"
           className={inputCls}
         />
       </label>
-      <p className="-mt-3 text-xs text-slate-500">
-        Give us an email, a phone, or both, so we have a way to reach you.
-      </p>
 
       <label className="block">
         <span className="mb-1 block text-sm font-medium text-slate-700">
