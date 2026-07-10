@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
   }
 
   const name = (body.name ?? "").trim();
-  const icsUrl = (body.ics_url ?? "").trim();
+  const rawUrl = (body.ics_url ?? "").trim();
+  const icsUrl = rawUrl.replace(/^webcal:\/\//, "https://");
   const code = (body.code ?? "").trim();
 
   if (!name) {

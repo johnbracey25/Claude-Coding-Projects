@@ -13,10 +13,12 @@ export async function addFeed(formData: FormData) {
 
   if (!name || !ics_url) throw new Error("Name and URL are required.");
 
+  const normalizedUrl = ics_url.replace(/^webcal:\/\//, "https://");
+
   const supabase = createClient();
   const { data, error } = await supabase
     .from("calendar_feeds")
-    .insert({ name, ics_url, color, keyword })
+    .insert({ name, ics_url: normalizedUrl, color, keyword })
     .select()
     .single();
   if (error) throw new Error(error.message);
