@@ -21,6 +21,7 @@ export interface Person {
   consent_to_contact: boolean;
   signed_up_at: string | null;
   is_repeat_participant: boolean;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
 }

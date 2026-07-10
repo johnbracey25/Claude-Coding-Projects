@@ -6,14 +6,50 @@ import { createClient } from "@/lib/supabase/server";
 import { normalizePhone, normalizeDate } from "@/lib/people-fields";
 import type { PersonInput, PersonStatus } from "@/lib/types";
 
-export async function deletePerson(formData: FormData) {
+export async function archivePerson(formData: FormData) {
+  const id = (formData.get("id") as string)?.trim();
+  if (!id) throw new Error("Missing person id");
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("people")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/people");
+  redirect("/people");
+}
+
+export async function archivePeople(ids: string[]) {
+  if (!ids.length) return;
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("people")
+    .update({ archived_at: new Date().toISOString() })
+    .in("id", ids);
+  if (error) throw new Error(error.message);
+  revalidatePath("/people");
+}
+
+export async function restorePerson(formData: FormData) {
+  const id = (formData.get("id") as string)?.trim();
+  if (!id) throw new Error("Missing person id");
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("people")
+    .update({ archived_at: null })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/people");
+  revalidatePath("/people/archived");
+}
+
+export async function permanentlyDeletePerson(formData: FormData) {
   const id = (formData.get("id") as string)?.trim();
   if (!id) throw new Error("Missing person id");
   const supabase = createClient();
   const { error } = await supabase.from("people").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/people");
-  redirect("/people");
+  revalidatePath("/people/archived");
 }
 
 /** Split a comma/semicolon list into a clean string array. */
