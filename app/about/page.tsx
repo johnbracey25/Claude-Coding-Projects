@@ -4,14 +4,14 @@ import PublicHeader from "@/components/PublicHeader";
 import PublicFooter from "@/components/PublicFooter";
 
 export const metadata: Metadata = {
-  title: "About Dr. Lauren Hacker, O.D. & Eve Research",
+  title: "About Dr. Lauren Hacker, OD & Eve Research",
   description:
-    "Meet Dr. Lauren Hacker, O.D., optometrist and founder of Eve Research in Athens, Georgia. 15+ years of experience in eye care and clinical vision research with Johnson & Johnson and Alcon.",
+    "Meet Dr. Lauren Hacker, OD, optometrist and founder of Eve Research in Athens, Georgia. 15+ years of experience in eye care and clinical vision research.",
   alternates: { canonical: "https://eve-research.com/about" },
 };
 
 const CREDENTIALS = [
-  "Nova Southeastern O.D.",
+  "Nova Southeastern OD",
   "VA Residency Trained",
   "15+ Years in Practice",
   "Clinical Researcher",
@@ -43,10 +43,10 @@ export default function AboutPage() {
             <Eyebrow>Meet the founder</Eyebrow>
           </div>
           <h1 className="mt-2 font-serif text-4xl font-bold tracking-tight text-brand-dark">
-            Dr. Lauren Hacker, O.D.
+            Dr. Lauren Hacker, OD
           </h1>
           <p className="mt-2 text-slate-600">
-            Doctor of Optometry · Founder of Eve Research · Athens, Georgia
+            Founder of Eve Research · Athens, Georgia
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {CREDENTIALS.map((c) => (
@@ -63,7 +63,7 @@ export default function AboutPage() {
         {/* Bio */}
         <section className="mt-10 rounded-2xl bg-white p-7 shadow-sm ring-1 ring-slate-100">
           <p className="leading-relaxed">
-            Dr. Lauren Hacker is a Doctor of Optometry and the founder of Eve
+            Dr. Lauren Hacker is an OD and the founder of Eve
             Research in Athens, Georgia. She has cared for patients of all ages for
             more than 15 years, and has spent much of her career at the leading
             edge of vision research.
@@ -74,10 +74,7 @@ export default function AboutPage() {
             Veterans Affairs Medical Center, focusing on ocular disease, low
             vision, and specialty contact lens fittings. In private practice she
             provided comprehensive eye care along with post-operative care using
-            the latest cataract and LASIK technologies. She is an active member of
-            the American Optometric Association and the Georgia Optometric
-            Association, and holds an active Georgia license and injections
-            certification.
+            the latest cataract and LASIK technologies.
           </p>
         </section>
 
@@ -91,10 +88,10 @@ export default function AboutPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-slate-100">
             Over the past decade, Dr. Hacker has helped run clinical studies for
-            leading eye-care companies, including Johnson &amp; Johnson and Alcon.
-            One project she is especially proud of tested contact lenses that
-            automatically darken in bright light. Working alongside vision
-            scientists at the University of Georgia, the team measured how these
+            leading eye-care companies. One project she is especially proud of
+            tested contact lenses that automatically darken in bright light.
+            Working alongside PhD vision scientists, Dr. Lisa Renzi-Hammond and
+            Dr. Randy Hammond, at the University of Georgia, the team measured how these
             light-adapting lenses helped people see more comfortably and clearly in
             intense glare, like bright sunlight. Research like this is how the
             everyday products that make vision easier get proven safe and effective
