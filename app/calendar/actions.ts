@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { syncAllFeeds, syncFeed } from "@/lib/calendar-sync";
+import { getSetting, setSetting } from "@/lib/settings";
 
 export async function addFeed(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
@@ -44,4 +45,15 @@ export async function toggleFeed(formData: FormData) {
 export async function syncNow() {
   await syncAllFeeds();
   revalidatePath("/calendar");
+}
+
+export async function generateInviteLink(): Promise<string> {
+  const code = crypto.randomUUID().slice(0, 8);
+  await setSetting("calendar_invite_code", code);
+  revalidatePath("/calendar");
+  return code;
+}
+
+export async function getInviteCode(): Promise<string | null> {
+  return getSetting("calendar_invite_code");
 }

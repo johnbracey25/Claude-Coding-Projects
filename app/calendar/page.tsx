@@ -1,9 +1,10 @@
 import AdminNav from "@/components/AdminNav";
 import SetupNotice from "@/components/SetupNotice";
-import { isSupabaseConfigured } from "@/lib/config";
+import { isSupabaseConfigured, appUrl } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
-import { addFeed, removeFeed, syncNow } from "./actions";
+import { addFeed, removeFeed, syncNow, getInviteCode } from "./actions";
 import CalendarWeekView from "@/components/CalendarWeekView";
+import CalendarInviteLink from "@/components/CalendarInviteLink";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,7 @@ export default async function CalendarPage() {
   }
 
   const supabase = createClient();
+  const inviteCode = await getInviteCode();
 
   const { data: feeds } = await supabase
     .from("calendar_feeds")
@@ -204,6 +206,11 @@ export default async function CalendarPage() {
             Keyword filter is optional. If set, only events whose title contains
             that word will sync.
           </p>
+        </section>
+
+        {/* Invite link */}
+        <section className="mt-4">
+          <CalendarInviteLink initialCode={inviteCode} baseUrl={appUrl} />
         </section>
 
         {/* Week view */}
