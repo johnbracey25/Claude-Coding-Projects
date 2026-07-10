@@ -101,18 +101,10 @@ export default function Home() {
         <div className="flex flex-col items-center gap-10 md:flex-row md:gap-16">
           {/* Left column */}
           <div className="flex-1 text-center md:flex-[4] md:text-left">
-            <div className="mb-8 flex items-center gap-4 justify-center md:justify-start">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/eve-icon.png" alt="" className="h-14 w-14 object-contain" />
-              <div className="flex flex-col leading-none">
-                <span className="font-serif text-4xl font-bold tracking-tight text-brand-dark">Eve</span>
-                <span className="text-sm font-semibold uppercase tracking-[0.2em] text-sage-dark">Research</span>
-              </div>
-            </div>
             <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-brand-dark sm:text-5xl lg:text-6xl">
-              Better vision{" "}
-              <br className="hidden sm:inline" />
-              for <span className="text-sage">tomorrow</span>
+              <span className="text-sage">Eve Research</span>
+              <br />
+              Better vision for tomorrow
             </h1>
             <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-sage md:mx-0" />
             <p className="mt-5 max-w-md text-lg leading-relaxed text-slate-600 md:mx-0 mx-auto">
