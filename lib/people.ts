@@ -1,14 +1,10 @@
 import { createClient } from "./supabase/server";
 import type { Person } from "./types";
 
-/**
- * Server-side data access for the people table. Uses the request-scoped
- * Supabase client so row-level security applies as the signed-in staff user.
- */
-
 export interface PeopleQuery {
   search?: string;
   limit?: number;
+  includeArchived?: boolean;
 }
 
 export async function listPeople(
@@ -21,15 +17,30 @@ export async function listPeople(
     .order("last_name", { ascending: true })
     .limit(query.limit ?? 200);
 
+  if (!query.includeArchived) {
+    q = q.is("archived_at", null);
+  }
+
   if (query.search?.trim()) {
     const s = query.search.trim();
-    // Match against name, email, or phone.
     q = q.or(
       `first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%`
     );
   }
 
   const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as Person[];
+}
+
+export async function listArchivedPeople(): Promise<Person[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("people")
+    .select("*")
+    .not("archived_at", "is", null)
+    .order("archived_at", { ascending: false })
+    .limit(200);
   if (error) throw error;
   return (data ?? []) as Person[];
 }
@@ -49,7 +60,8 @@ export async function countPeople(): Promise<number> {
   const supabase = createClient();
   const { count, error } = await supabase
     .from("people")
-    .select("*", { count: "exact", head: true });
+    .select("*", { count: "exact", head: true })
+    .is("archived_at", null);
   if (error) throw error;
   return count ?? 0;
 }

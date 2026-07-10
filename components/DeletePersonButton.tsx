@@ -1,6 +1,6 @@
 "use client";
 
-import { deletePerson } from "@/app/people/actions";
+import { archivePerson } from "@/app/people/actions";
 
 export default function DeletePersonButton({
   id,
@@ -11,9 +11,9 @@ export default function DeletePersonButton({
 }) {
   return (
     <form
-      action={deletePerson}
+      action={archivePerson}
       onSubmit={(e) => {
-        if (!confirm(`Delete ${name}? This cannot be undone.`)) {
+        if (!confirm(`Delete ${name}? You can recover this record for 30 days from the archived list.`)) {
           e.preventDefault();
         }
       }}
