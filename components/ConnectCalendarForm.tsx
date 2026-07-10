@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 
 type Platform = "" | "google" | "apple";
 
@@ -26,9 +25,7 @@ const APPLE_STEPS = [
 const inputCls =
   "w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
 
-export default function ConnectCalendarForm() {
-  const params = useSearchParams();
-  const code = params.get("code") ?? "";
+export default function ConnectCalendarForm({ code = "" }: { code?: string }) {
 
   const [platform, setPlatform] = useState<Platform>("");
   const [name, setName] = useState("");
