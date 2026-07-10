@@ -97,7 +97,7 @@ export default function Home() {
       </div>
 
       {/* Hero */}
-      <section className="mx-auto w-full max-w-6xl px-5 pb-12 pt-8 sm:pt-16">
+      <section className="mx-auto w-full max-w-7xl px-5 pb-12 pt-8 sm:pt-16">
         <div className="flex flex-col items-center gap-10 md:flex-row md:gap-16">
           {/* Left column */}
           <div className="flex-1 text-center md:flex-[4] md:text-left">
@@ -136,12 +136,12 @@ export default function Home() {
           </div>
 
           {/* Right column -- logo icon */}
-          <div className="flex flex-1 items-center justify-center md:flex-[8]">
+          <div className="flex flex-1 items-center justify-center md:flex-[10]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/eve-icon.png"
               alt="Eve Research eye logo"
-              className="w-[31rem] max-w-full object-contain sm:w-[36rem] md:w-full"
+              className="w-[46rem] max-w-full object-contain sm:w-[54rem] md:w-full"
             />
           </div>
         </div>
