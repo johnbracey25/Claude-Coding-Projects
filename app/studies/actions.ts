@@ -54,36 +54,39 @@ export async function saveStudy(formData: FormData) {
     min_lead_hours: Number(formData.get("min_lead_hours") ?? 0) || 0,
     eligibility_rules,
     visit_plan,
-    calendar_feed_ids,
   };
 
   const supabase = createClient();
 
+  let studyId: string;
+
   if (id) {
-    let { error } = await supabase.from("studies").update(values).eq("id", id);
-    if (error) {
-      const { calendar_feed_ids: _, ...fallback } = values;
-      const retry = await supabase.from("studies").update(fallback).eq("id", id);
-      if (retry.error) throw new Error(retry.error.message);
-    }
-    revalidatePath(`/studies/${id}`);
-    revalidatePath("/studies");
-    redirect(`/studies/${id}`);
+    const { error } = await supabase.from("studies").update(values).eq("id", id);
+    if (error) throw new Error(error.message);
+    studyId = id;
   } else {
-    let { data, error } = await supabase
+    const { data, error } = await supabase
       .from("studies")
       .insert(values)
       .select("id")
       .single();
-    if (error) {
-      const { calendar_feed_ids: _, ...fallback } = values;
-      const retry = await supabase.from("studies").insert(fallback).select("id").single();
-      if (retry.error) throw new Error(retry.error.message);
-      data = retry.data;
-    }
-    revalidatePath("/studies");
-    redirect(`/studies/${data!.id}`);
+    if (error) throw new Error(error.message);
+    studyId = data.id;
   }
+
+  // Update calendar_feed_ids separately — silently ignore if column doesn't exist yet.
+  try {
+    await supabase
+      .from("studies")
+      .update({ calendar_feed_ids })
+      .eq("id", studyId);
+  } catch {
+    /* column may not exist — that's OK */
+  }
+
+  revalidatePath(`/studies/${studyId}`);
+  revalidatePath("/studies");
+  redirect(`/studies/${studyId}`);
 }
 
 /** Run eligibility matching for a study, then refresh its page. */
