@@ -255,16 +255,7 @@ export default function GettingStartedPage() {
               </ol>
             </div>
 
-            <p>
-              Then just text that link to John at{" "}
-              <a
-                href={`sms:${PHONE_TEL}`}
-                className="font-semibold text-brand-dark underline"
-              >
-                {PHONE_DISPLAY}
-              </a>{" "}
-              and he&apos;ll take it from there.
-            </p>
+            <p>Send John the link and he&apos;ll take it from there.</p>
           </StepCard>
         </div>
 
@@ -274,11 +265,12 @@ export default function GettingStartedPage() {
             Stuck on anything?
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            No question is too small. Text John and he&apos;ll walk you through it.
+            No question is too small — reach out to John at{" "}
+            <a href={`sms:${PHONE_TEL}`} className="font-medium text-brand-dark underline">
+              {PHONE_DISPLAY}
+            </a>{" "}
+            and we&apos;ll walk you through it.
           </p>
-          <div className="mt-4 flex justify-center">
-            <TextJohnButton />
-          </div>
         </section>
       </main>
 
