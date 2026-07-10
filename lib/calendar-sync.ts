@@ -6,6 +6,12 @@ export interface FeedSyncResult {
   name: string;
   ok: boolean;
   imported: number;
+  /** How many events parsed from the feed (before the keyword filter). */
+  parsedCount?: number;
+  /** The keyword filter applied, if any. */
+  keyword?: string | null;
+  /** A few real event titles seen in the feed, to diagnose filter mismatches. */
+  sampleTitles?: string[];
   error?: string;
 }
 
@@ -74,9 +80,22 @@ export async function syncFeed(feed: {
 
   const keyword = (feed.keyword ?? "").trim().toLowerCase();
   const now = Date.now();
-  const events = parseIcs(text)
-    .filter((e) => new Date(e.endUtc).getTime() > now)
-    .filter((e) => (keyword ? e.summary.toLowerCase().includes(keyword) : true));
+  const parsed = parseIcs(text).filter(
+    (e) => new Date(e.endUtc).getTime() > now
+  );
+  const events = parsed.filter((e) =>
+    keyword ? e.summary.toLowerCase().includes(keyword) : true
+  );
+
+  // Distinct sample titles (helps diagnose keyword-filter mismatches).
+  const sampleTitles = Array.from(
+    new Set(parsed.map((e) => e.summary.trim()).filter(Boolean))
+  ).slice(0, 6);
+  const diag = {
+    parsedCount: parsed.length,
+    keyword: feed.keyword ?? null,
+    sampleTitles,
+  };
 
   await supabase.from("calendar_events").delete().eq("feed_id", feed.id);
 
@@ -94,7 +113,7 @@ export async function syncFeed(feed: {
         .from("calendar_feeds")
         .update({ last_error: error.message, last_synced_at: new Date().toISOString() })
         .eq("id", feed.id);
-      return { ...base, ok: false, imported: 0, error: error.message };
+      return { ...base, ...diag, ok: false, imported: 0, error: error.message };
     }
   }
 
@@ -103,7 +122,7 @@ export async function syncFeed(feed: {
     .update({ last_error: null, last_synced_at: new Date().toISOString() })
     .eq("id", feed.id);
 
-  return { ...base, ok: true, imported: events.length };
+  return { ...base, ...diag, ok: true, imported: events.length };
 }
 
 // Keep backward compat for the old single-feed sync (used by existing cron)

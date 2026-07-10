@@ -25,6 +25,9 @@ export default function SyncButton({
 
   const totalImported = result?.imported ?? 0;
   const failed = result?.feeds.filter((f) => !f.ok) ?? [];
+  // Feeds that synced fine but matched no availability — the common confusing case.
+  const empty =
+    result?.feeds.filter((f) => f.ok && f.imported === 0) ?? [];
 
   return (
     <div className={compact ? "" : "flex flex-col items-end gap-2"}>
@@ -37,29 +40,52 @@ export default function SyncButton({
       </button>
 
       {result && !pending && (
-        <div className="text-right text-xs">
+        <div className="max-w-md text-right text-xs">
           {result.feeds.length === 0 ? (
             <p className="text-slate-500">No calendars connected yet.</p>
-          ) : failed.length === 0 ? (
-            <p className="text-emerald-600">
-              Synced {result.feeds.length} calendar
-              {result.feeds.length === 1 ? "" : "s"} · {totalImported} availability
-              block{totalImported === 1 ? "" : "s"} found.
-            </p>
           ) : (
-            <div className="text-rose-600">
-              <p>
-                {failed.length} calendar{failed.length === 1 ? "" : "s"} had a
-                problem:
-              </p>
-              <ul className="mt-0.5">
-                {failed.map((f) => (
-                  <li key={f.feedId}>
-                    {f.name}: {f.error}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <>
+              {failed.length === 0 && empty.length === 0 && (
+                <p className="text-emerald-600">
+                  Synced {result.feeds.length} calendar
+                  {result.feeds.length === 1 ? "" : "s"} · {totalImported}{" "}
+                  availability block{totalImported === 1 ? "" : "s"} found.
+                </p>
+              )}
+
+              {failed.map((f) => (
+                <p key={f.feedId} className="text-rose-600">
+                  {f.name}: {f.error}
+                </p>
+              ))}
+
+              {empty.map((f) => (
+                <div
+                  key={f.feedId}
+                  className="mt-1 rounded-lg border border-amber-200 bg-amber-50 p-2 text-left text-amber-800"
+                >
+                  <p className="font-medium">
+                    {f.name}: parsed {f.parsedCount ?? 0} event
+                    {(f.parsedCount ?? 0) === 1 ? "" : "s"}, 0 matched
+                    {f.keyword ? ` keyword “${f.keyword}”` : ""}.
+                  </p>
+                  {(f.parsedCount ?? 0) === 0 ? (
+                    <p className="mt-0.5">
+                      No upcoming events were read from this feed. The calendar
+                      may have no future events, or its share link may point to a
+                      different calendar.
+                    </p>
+                  ) : f.sampleTitles && f.sampleTitles.length > 0 ? (
+                    <p className="mt-0.5">
+                      Event titles seen:{" "}
+                      {f.sampleTitles.map((t) => `“${t}”`).join(", ")}. Set the
+                      keyword filter to match one of these (or clear it to show
+                      all).
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </>
           )}
         </div>
       )}

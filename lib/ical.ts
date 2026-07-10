@@ -163,9 +163,16 @@ function mondayIndex(y: number, mo: number, d: number): number {
   return Math.floor((base - wd * DAY_MS) / (7 * DAY_MS));
 }
 
+/** UTC-midnight anchor for a calendar date (used for day arithmetic). */
+function dateAnchor(y: number, mo: number, d: number): number {
+  return Date.UTC(y, mo - 1, d);
+}
+
 /**
  * Expand a recurring event into concrete occurrences within [nowMs, horizonMs].
- * Returns start/end UTC ms pairs.
+ * Fast-forwards to the visible window so long-running series (e.g. a weekly
+ * block set up years ago) still produce current occurrences. Returns
+ * start/end UTC ms pairs.
  */
 function expandRecurrence(
   start: WallTime,
@@ -176,73 +183,94 @@ function expandRecurrence(
   horizonMs: number
 ): Array<{ startMs: number; endMs: number }> {
   const out: Array<{ startMs: number; endMs: number }> = [];
-  const startWeekIdx = mondayIndex(start.y, start.mo, start.d);
-  let emitted = 0;
-  let generated = 0;
+  const firstMs = toUtcMs(start);
+  if (firstMs > horizonMs) return out;
 
-  const push = (y: number, mo: number, d: number) => {
-    const startMs = toUtcMsOnDate(start, y, mo, d);
-    if (rrule.untilMs != null && startMs > rrule.untilMs) return false;
-    if (startMs > horizonMs) return false;
-    const endMs = startMs + durationMs;
+  const startAnchor = dateAnchor(start.y, start.mo, start.d);
+  const startWeekIdx = mondayIndex(start.y, start.mo, start.d);
+
+  const consider = (y: number, mo: number, d: number): boolean => {
+    // returns false to signal "past horizon, stop"
+    const occMs = toUtcMsOnDate(start, y, mo, d);
+    if (occMs > horizonMs) return false;
+    if (rrule.untilMs != null && occMs > rrule.untilMs) return false;
+    if (occMs + durationMs <= nowMs) return true; // in the past, keep scanning
     const key = `${y}-${mo}-${d}`;
-    if (!exdates.has(key) && endMs > nowMs) {
-      out.push({ startMs, endMs });
-    }
-    generated += 1;
+    if (!exdates.has(key)) out.push({ startMs: occMs, endMs: occMs + durationMs });
     return true;
   };
 
-  if (rrule.freq === "DAILY") {
-    for (let k = 0; k < 366 * 2; k++) {
-      const dt = new Date(Date.UTC(start.y, start.mo - 1, start.d + k * rrule.interval));
-      const y = dt.getUTCFullYear();
-      const mo = dt.getUTCMonth() + 1;
-      const d = dt.getUTCDate();
-      if (toUtcMsOnDate(start, y, mo, d) > horizonMs) break;
-      if (rrule.count != null && emitted >= rrule.count) break;
-      if (!push(y, mo, d)) break;
-      emitted += 1;
-      if (generated > MAX_OCCURRENCES) break;
+  if (rrule.freq === "MONTHLY") {
+    for (let k = 0; k < 1200; k++) {
+      if (rrule.count != null && k >= rrule.count) break;
+      const dt = new Date(
+        Date.UTC(start.y, start.mo - 1 + k * rrule.interval, start.d)
+      );
+      const cont = consider(
+        dt.getUTCFullYear(),
+        dt.getUTCMonth() + 1,
+        dt.getUTCDate()
+      );
+      if (!cont) break;
+      if (out.length > MAX_OCCURRENCES) break;
     }
-  } else if (rrule.freq === "WEEKLY") {
-    const bydays = rrule.byday ?? [weekdayOf(start.y, start.mo, start.d)];
-    for (let k = 0; k < 366 * 2; k++) {
-      const dt = new Date(Date.UTC(start.y, start.mo - 1, start.d + k));
-      const y = dt.getUTCFullYear();
-      const mo = dt.getUTCMonth() + 1;
-      const d = dt.getUTCDate();
-      const startMs = toUtcMsOnDate(start, y, mo, d);
-      if (startMs > horizonMs) break;
-      if (rrule.count != null && emitted >= rrule.count) break;
-      const wIdx = mondayIndex(y, mo, d) - startWeekIdx;
-      if (wIdx % rrule.interval !== 0) continue;
-      if (!bydays.includes(weekdayOf(y, mo, d))) continue;
-      if (startMs < toUtcMs(start)) continue; // don't go before DTSTART
-      push(y, mo, d);
-      emitted += 1;
-      if (generated > MAX_OCCURRENCES) break;
-    }
-  } else if (rrule.freq === "MONTHLY") {
-    for (let k = 0; k < 60; k++) {
-      const dt = new Date(Date.UTC(start.y, start.mo - 1 + k * rrule.interval, start.d));
-      const y = dt.getUTCFullYear();
-      const mo = dt.getUTCMonth() + 1;
-      const d = dt.getUTCDate();
-      if (toUtcMsOnDate(start, y, mo, d) > horizonMs) break;
-      if (rrule.count != null && emitted >= rrule.count) break;
-      if (!push(y, mo, d)) break;
-      emitted += 1;
-      if (generated > MAX_OCCURRENCES) break;
-    }
-  } else {
-    // Unknown frequency: emit the single base occurrence if in-window.
-    const startMs = toUtcMs(start);
-    if (startMs + durationMs > nowMs && startMs <= horizonMs) {
-      out.push({ startMs, endMs: startMs + durationMs });
-    }
+    return out;
   }
 
+  if (rrule.freq === "DAILY" || rrule.freq === "WEEKLY") {
+    const bydays =
+      rrule.freq === "WEEKLY"
+        ? (rrule.byday ?? [weekdayOf(start.y, start.mo, start.d)])
+        : null;
+
+    // With COUNT we must count from DTSTART; otherwise fast-forward to the window.
+    let cursor: number;
+    if (rrule.count != null) {
+      cursor = startAnchor;
+    } else {
+      const windowStart = Math.max(startAnchor, nowMs - DAY_MS);
+      // Snap window start back to a whole UTC day.
+      cursor = Math.floor(windowStart / DAY_MS) * DAY_MS;
+      if (cursor < startAnchor) cursor = startAnchor;
+    }
+
+    let matched = 0; // occurrences counted from DTSTART (for COUNT)
+    for (let i = 0; i < 1500; i++) {
+      const dt = new Date(cursor);
+      const y = dt.getUTCFullYear();
+      const mo = dt.getUTCMonth() + 1;
+      const d = dt.getUTCDate();
+      const daysSince = Math.round((cursor - startAnchor) / DAY_MS);
+
+      if (daysSince >= 0) {
+        let isOccurrence = false;
+        if (rrule.freq === "DAILY") {
+          isOccurrence = daysSince % rrule.interval === 0;
+        } else {
+          const wIdx = mondayIndex(y, mo, d) - startWeekIdx;
+          isOccurrence =
+            bydays!.includes(weekdayOf(y, mo, d)) &&
+            wIdx % rrule.interval === 0;
+        }
+        if (isOccurrence) {
+          if (rrule.count != null && matched >= rrule.count) break;
+          const cont = consider(y, mo, d);
+          matched += 1;
+          if (!cont) break;
+          if (out.length > MAX_OCCURRENCES) break;
+        }
+      }
+      cursor += DAY_MS;
+      if (toUtcMsOnDate(start, dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate()) > horizonMs)
+        break;
+    }
+    return out;
+  }
+
+  // Unknown frequency: emit the single base occurrence if in-window.
+  if (firstMs + durationMs > nowMs && firstMs <= horizonMs) {
+    out.push({ startMs: firstMs, endMs: firstMs + durationMs });
+  }
   return out;
 }
 
