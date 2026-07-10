@@ -3,7 +3,7 @@ import AdminNav from "@/components/AdminNav";
 import SetupNotice from "@/components/SetupNotice";
 import { isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
-import CalendarMonthView from "@/components/CalendarMonthView";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import SyncButton from "@/components/SyncButton";
 
 export const dynamic = "force-dynamic";
@@ -100,40 +100,40 @@ export default async function CalendarPage() {
               Connect a calendar
             </Link>
           </div>
-        ) : events.length === 0 ? (
-          <div className="mt-8">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-              <p className="font-medium">
-                No availability found for the connected calendars.
-              </p>
-              <p className="mt-1">
-                This usually means the keyword filter doesn&apos;t match any
-                events, or the calendars haven&apos;t synced yet. Try{" "}
-                <span className="font-medium">Sync now</span> above, or check the
-                keyword filters in{" "}
-                <Link href="/calendar/setup" className="underline">
-                  Calendar setup
-                </Link>
-                .
-              </p>
-            </div>
-            <div className="mt-6">
-              <CalendarMonthView events={[]} />
-            </div>
-          </div>
         ) : (
-          <section className="mt-6">
-            <CalendarMonthView
-              events={events.map((e) => ({
-                id: e.id,
-                summary: e.summary ?? "",
-                starts_at: e.starts_at,
-                ends_at: e.ends_at,
-                color: feedMap[e.feed_id]?.color ?? "#6f8767",
-                feedName: feedMap[e.feed_id]?.name ?? "Unknown",
-              }))}
-            />
-          </section>
+          <>
+            {events.length === 0 && (
+              <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+                <p className="font-medium">
+                  No availability found for the connected calendars.
+                </p>
+                <p className="mt-1">
+                  This usually means the keyword filter doesn&apos;t match any
+                  events, or the calendars haven&apos;t synced yet. Try{" "}
+                  <span className="font-medium">Sync now</span> above, or check
+                  the keyword filters in{" "}
+                  <Link href="/calendar/setup" className="underline">
+                    Calendar setup
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+            <section className="mt-6">
+              <AvailabilityCalendar
+                feedCount={feedIds.length}
+                events={events.map((e) => ({
+                  id: e.id,
+                  feedId: e.feed_id,
+                  summary: e.summary ?? "",
+                  starts_at: e.starts_at,
+                  ends_at: e.ends_at,
+                  color: feedMap[e.feed_id]?.color ?? "#6f8767",
+                  feedName: feedMap[e.feed_id]?.name ?? "Unknown",
+                }))}
+              />
+            </section>
+          </>
         )}
       </main>
     </>
