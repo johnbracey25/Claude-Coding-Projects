@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+  if (!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)) {
     return NextResponse.json(
       { error: "That email address doesn't look right." },
       { status: 400 }
@@ -88,6 +88,13 @@ export async function POST(req: NextRequest) {
   if (!phone) {
     return NextResponse.json(
       { error: "Please enter your mobile phone number." },
+      { status: 400 }
+    );
+  }
+  const phoneDigits = phone.replace(/\D/g, "");
+  if (phoneDigits.length < 10) {
+    return NextResponse.json(
+      { error: "Please enter a valid 10-digit phone number." },
       { status: 400 }
     );
   }

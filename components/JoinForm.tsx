@@ -241,6 +241,8 @@ export default function JoinForm() {
           name="email"
           type="email"
           required
+          pattern="[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}"
+          title="Please enter a valid email address"
           inputMode="email"
           autoComplete="email"
           autoCapitalize="off"
@@ -256,6 +258,8 @@ export default function JoinForm() {
           name="phone"
           type="tel"
           required
+          pattern="[\d\s\-\(\)\+]{10,}"
+          title="Please enter a valid 10-digit phone number"
           inputMode="tel"
           autoComplete="tel"
           className={inputCls}
