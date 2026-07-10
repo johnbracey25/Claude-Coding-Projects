@@ -14,7 +14,7 @@ const LINKS = [
 export default function AdminNav() {
   return (
     <header className="border-b border-slate-200 bg-white">
-      <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-1 px-4">
+      <nav className="mx-auto flex max-w-5xl items-center gap-1 overflow-x-auto px-4">
         <Link
           href="/dashboard"
           className="mr-3 flex items-center gap-2 py-2 font-semibold text-brand-dark"
