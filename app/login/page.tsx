@@ -6,7 +6,7 @@ import SetupNotice from "@/components/SetupNotice";
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string; next?: string };
+  searchParams: { error?: string; notice?: string; next?: string };
 }) {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
@@ -28,6 +28,11 @@ export default function LoginPage({
         <>
           <form action={signIn} className="mt-8 space-y-4">
             <input type="hidden" name="next" value={searchParams.next ?? "/dashboard"} />
+            {searchParams.notice && (
+              <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-700">
+                {searchParams.notice}
+              </div>
+            )}
             {searchParams.error && (
               <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
                 {searchParams.error}

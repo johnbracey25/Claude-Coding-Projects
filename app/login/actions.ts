@@ -2,7 +2,24 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+
+/**
+ * The origin the user is actually on, derived from the request. This is more
+ * reliable than NEXT_PUBLIC_APP_URL (which is easy to leave unset in prod and
+ * would otherwise send reset links to localhost).
+ */
+function requestOrigin(): string {
+  const h = headers();
+  const host = h.get("host");
+  if (host) {
+    const proto =
+      h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  }
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
 
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
@@ -38,15 +55,13 @@ export async function resetPassword(formData: FormData) {
   }
 
   const supabase = createClient();
-  const siteUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${siteUrl}/auth/callback?next=/login/reset`,
+    redirectTo: `${requestOrigin()}/auth/callback?next=/login/reset`,
   });
 
   redirect(
-    `/login?error=${encodeURIComponent("If that email is on file, you'll receive a reset link shortly.")}`
+    `/login?notice=${encodeURIComponent("If that email is on file, you'll receive a reset link shortly. Check your inbox (and spam).")}`
   );
 }
 

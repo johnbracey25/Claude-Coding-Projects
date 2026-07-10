@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
@@ -10,6 +10,26 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
+  // null = still checking, true/false = whether a recovery session exists.
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setHasSession(true);
+    });
+    // The recovery session may arrive slightly after mount (e.g. from a URL
+    // fragment); listen so we flip to the form when it does.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) setHasSession(true);
+    });
+    // Resolve the "checking" state even if no session ever arrives.
+    const t = setTimeout(() => setHasSession((prev) => prev ?? false), 2500);
+    return () => {
+      sub.subscription.unsubscribe();
+      clearTimeout(t);
+    };
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +71,34 @@ export default function ResetPasswordPage() {
           className="mt-6 inline-block rounded-lg bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
         >
           Go to dashboard
+        </Link>
+      </main>
+    );
+  }
+
+  if (hasSession === null) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 text-center">
+        <p className="text-sm text-slate-500">Checking your reset link…</p>
+      </main>
+    );
+  }
+
+  if (hasSession === false) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 text-center">
+        <h1 className="font-serif text-2xl font-bold text-brand-dark">
+          Link expired or invalid
+        </h1>
+        <p className="mt-2 text-sm text-slate-600">
+          This password reset link is no longer valid. Reset links expire after
+          a short time and can only be used once.
+        </p>
+        <Link
+          href="/login/forgot"
+          className="mt-6 inline-block rounded-lg bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+        >
+          Request a new link
         </Link>
       </main>
     );
