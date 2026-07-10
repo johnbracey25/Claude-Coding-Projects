@@ -35,11 +35,11 @@ export default function AboutPage() {
         <section className="pt-12 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/eve-research-logo.png"
-            alt="Eve Research"
-            className="mx-auto h-28 w-28 rounded-2xl object-contain shadow-sm ring-1 ring-black/5"
+            src="/lauren-hacker.jpg"
+            alt="Dr. Lauren Hacker"
+            className="mx-auto h-56 w-56 rounded-full object-cover object-top shadow-md ring-4 ring-white"
           />
-          <div className="mt-5">
+          <div className="mt-6">
             <Eyebrow>Meet the founder</Eyebrow>
           </div>
           <h1 className="mt-2 font-serif text-4xl font-bold tracking-tight text-brand-dark">
@@ -142,8 +142,9 @@ export default function AboutPage() {
         <section className="mt-8 rounded-2xl bg-sage/10 p-6 ring-1 ring-sage/20">
           <p className="leading-relaxed text-slate-700">
             Beyond the clinic, Dr. Hacker has called Athens, Georgia home for 20
-            years. She is married to John Bracey and mom to their daughter, Ivey
-            Jane.
+            years. She is a dedicated yoga and Pilates instructor and practitioner
+            at M3 in Athens. She is married to John Bracey and mom to their
+            daughter, Ivey Jane.
           </p>
         </section>
 
