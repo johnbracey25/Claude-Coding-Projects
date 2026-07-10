@@ -10,8 +10,6 @@ export interface FeedSyncResult {
   parsedCount?: number;
   /** The keyword filter applied, if any. */
   keyword?: string | null;
-  /** A few real event titles seen in the feed, to diagnose filter mismatches. */
-  sampleTitles?: string[];
   error?: string;
 }
 
@@ -87,14 +85,10 @@ export async function syncFeed(feed: {
     keyword ? e.summary.toLowerCase().includes(keyword) : true
   );
 
-  // Distinct sample titles (helps diagnose keyword-filter mismatches).
-  const sampleTitles = Array.from(
-    new Set(parsed.map((e) => e.summary.trim()).filter(Boolean))
-  ).slice(0, 6);
+  // Counts only — never surface the raw event titles, which are personal.
   const diag = {
     parsedCount: parsed.length,
     keyword: feed.keyword ?? null,
-    sampleTitles,
   };
 
   await supabase.from("calendar_events").delete().eq("feed_id", feed.id);

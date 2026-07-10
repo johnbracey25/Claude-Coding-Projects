@@ -75,12 +75,12 @@ export default function SyncButton({
                       may have no future events, or its share link may point to a
                       different calendar.
                     </p>
-                  ) : f.sampleTitles && f.sampleTitles.length > 0 ? (
+                  ) : f.keyword ? (
                     <p className="mt-0.5">
-                      Event titles seen:{" "}
-                      {f.sampleTitles.map((t) => `“${t}”`).join(", ")}. Set the
-                      keyword filter to match one of these (or clear it to show
-                      all).
+                      This calendar has events, but none are titled
+                      &ldquo;{f.keyword}&rdquo;. Make sure the shared calendar is
+                      the one with the availability blocks, and that the keyword
+                      matches how those blocks are titled.
                     </p>
                   ) : null}
                 </div>
