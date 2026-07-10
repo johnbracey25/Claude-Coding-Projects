@@ -31,6 +31,25 @@ export async function signIn(formData: FormData) {
   redirect(next.startsWith("/") ? next : "/dashboard");
 }
 
+export async function resetPassword(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) {
+    redirect("/login?error=Please+enter+your+email+first.");
+  }
+
+  const supabase = createClient();
+  const siteUrl =
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${siteUrl}/auth/callback?next=/login/reset`,
+  });
+
+  redirect(
+    `/login?error=${encodeURIComponent("If that email is on file, you'll receive a reset link shortly.")}`
+  );
+}
+
 export async function signOut() {
   const supabase = createClient();
   await supabase.auth.signOut();

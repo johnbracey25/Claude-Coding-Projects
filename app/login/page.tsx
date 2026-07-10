@@ -25,38 +25,48 @@ export default function LoginPage({
           <SetupNotice />
         </div>
       ) : (
-        <form action={signIn} className="mt-8 space-y-4">
-          <input type="hidden" name="next" value={searchParams.next ?? "/dashboard"} />
-          {searchParams.error && (
-            <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
-              {searchParams.error}
-            </div>
-          )}
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-600">Email</span>
-            <input
-              name="email"
-              type="email"
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-600">Password</span>
-            <input
-              name="password"
-              type="password"
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            />
-          </label>
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
-          >
-            Sign in
-          </button>
-        </form>
+        <>
+          <form action={signIn} className="mt-8 space-y-4">
+            <input type="hidden" name="next" value={searchParams.next ?? "/dashboard"} />
+            {searchParams.error && (
+              <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+                {searchParams.error}
+              </div>
+            )}
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-slate-600">Email</span>
+              <input
+                name="email"
+                type="email"
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-slate-600">Password</span>
+              <input
+                name="password"
+                type="password"
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              />
+            </label>
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+            >
+              Sign in
+            </button>
+          </form>
+          <p className="mt-3 text-center">
+            <Link
+              href="/login/forgot"
+              className="text-xs text-slate-400 hover:text-brand hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </p>
+        </>
       )}
 
       <p className="mt-6 text-center text-xs text-slate-400">
