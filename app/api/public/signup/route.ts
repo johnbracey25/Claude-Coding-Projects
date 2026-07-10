@@ -166,34 +166,42 @@ export async function POST(req: NextRequest) {
     }
 
     if (existingId) {
-      // Non-destructive merge: never blank out existing data with empty values.
-      // Empty strings, empty arrays, and null are dropped so a partial re-signup
-      // only adds/updates the fields the person actually provided this time.
-      const updates = omitEmpty({
-        first_name: first,
-        last_name: last,
-        email,
-        phone,
-        date_of_birth: dob,
-        // Required on the form, so always a real yes/no.
-        had_cataract_surgery: values.had_cataract_surgery,
-        contact_rx: contactRx,
-        eye_conditions: eyeConditions,
-        tags,
-        notes: values.notes,
-        // Always refresh consent/opt-in and signup metadata.
+      // Check if this record was archived (deleted) -- if so, treat as a
+      // fresh signup so they get a welcome email again.
+      const { data: existing } = await supabase
+        .from("people")
+        .select("archived_at")
+        .eq("id", existingId)
+        .single();
+      const wasArchived = !!existing?.archived_at;
+
+      const updates: Record<string, unknown> = {
+        ...omitEmpty({
+          first_name: first,
+          last_name: last,
+          email,
+          phone,
+          date_of_birth: dob,
+          had_cataract_surgery: values.had_cataract_surgery,
+          contact_rx: contactRx,
+          eye_conditions: eyeConditions,
+          tags,
+          notes: values.notes,
+        }),
         email_opt_in: true,
         consent_to_contact: true,
         status: "active",
         source,
         signed_up_at: values.signed_up_at,
-      });
+        archived_at: null,
+      };
       const { error } = await supabase
         .from("people")
         .update(updates)
         .eq("id", existingId);
       if (error) throw error;
       personId = existingId;
+      if (wasArchived) isNewSignup = true;
     } else {
       const { data, error } = await supabase
         .from("people")
