@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   "/book",
   "/r",
   "/connect-calendar",
+  "/calendar-help",
   "/api/public",
   "/api/webhooks",
   "/api/unsubscribe",
