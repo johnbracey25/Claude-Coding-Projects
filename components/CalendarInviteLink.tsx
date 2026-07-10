@@ -14,7 +14,7 @@ export default function CalendarInviteLink({
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const link = code ? `${baseUrl}/connect-calendar?code=${code}` : null;
+  const link = code ? `${baseUrl}/calendar-help?code=${code}` : null;
 
   async function generate() {
     setBusy(true);
