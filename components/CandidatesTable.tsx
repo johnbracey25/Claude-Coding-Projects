@@ -10,6 +10,7 @@ import {
 } from "@/app/studies/actions";
 import type { CandidateWithPerson } from "@/lib/studies";
 import type { CandidateStatus } from "@/lib/types";
+import { formatAvailability } from "@/lib/availability";
 
 const CAND_STYLE: Record<CandidateStatus, string> = {
   eligible: "bg-sky-100 text-sky-700",
@@ -114,7 +115,7 @@ export default function CandidatesTable({
               </th>
               <th className="px-3 py-2 font-medium">Name</th>
               <th className="px-3 py-2 font-medium">Contact</th>
-              <th className="px-3 py-2 font-medium">Booking link</th>
+              <th className="px-3 py-2 font-medium">Response link</th>
               <th className="px-3 py-2 font-medium">Status</th>
               <th className="px-3 py-2 font-medium">Actions</th>
             </tr>
@@ -140,6 +141,15 @@ export default function CandidatesTable({
                     >
                       {name}
                     </Link>
+                    {c.availability_pref &&
+                      formatAvailability(c.availability_pref) && (
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          <span className="font-medium text-slate-400">
+                            Avail:{" "}
+                          </span>
+                          {formatAvailability(c.availability_pref)}
+                        </p>
+                      )}
                   </td>
                   <td className="px-3 py-2 text-slate-600">
                     {p.email ?? p.phone ?? "-"}

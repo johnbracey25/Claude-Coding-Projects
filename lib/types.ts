@@ -1,3 +1,5 @@
+import type { AvailabilityPref } from "./availability";
+
 export type PersonStatus = "active" | "inactive" | "do_not_contact";
 
 export interface Person {
@@ -88,6 +90,7 @@ export interface Candidate {
   notes: string | null;
   token: string;
   response: string | null;
+  availability_pref: AvailabilityPref | null;
 }
 
 export interface AvailabilityWindow {

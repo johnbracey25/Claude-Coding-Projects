@@ -42,33 +42,66 @@ export function inviteEmail(
 ): { subject: string; html: string; text: string } {
   const link = responseUrl(candidate);
   const unsub = unsubscribeUrl(candidate);
-  const comp = study.compensation
-    ? ` Participants receive ${study.compensation}.`
-    : "";
   const subject = `You may qualify for a study: ${study.name}`;
   const text =
     `Hi ${firstName(person)},\n\n` +
-    `Based on what you told us, you may be a good fit for our study "${study.name}".${comp}\n\n` +
-    `If you're interested, let us know here: ${link}\n\n` +
+    `Based on what you told us, you may be a good fit for our study "${study.name}".\n\n` +
+    (study.description ? `${study.description}\n\n` : "") +
+    (study.compensation ? `Compensation: ${study.compensation}\n\n` : "") +
+    `If you're interested, let us know here and tell us your general availability. ` +
+    `We'll give you a call to find a visit time that works — there's nothing to ` +
+    `schedule online right now:\n${link}\n\n` +
     `Thanks,\nEve Research\n\n` +
     `Don't want these emails? Unsubscribe: ${unsub}`;
   const html = emailLayout(`
     <tr>
-      <td style="padding:32px 32px 0;text-align:center">
-        <img src="https://eve-research.com/eve-research-logo.png" alt="Eve Research" width="60" height="60" style="display:block;margin:0 auto;border-radius:12px" />
+      <td style="padding:36px 32px 28px;text-align:center;background:#152b3e">
+        <img src="https://eve-research.com/eve-research-logo.png" alt="Eve Research" width="68" height="68" style="display:block;margin:0 auto 12px;border-radius:14px" />
+        <p style="margin:0;font-family:Georgia,serif;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:0.01em">Eve Research</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#9db3c7">You may qualify for a study</p>
       </td>
     </tr>
     <tr>
-      <td style="padding:24px 32px 0">
+      <td style="padding:28px 32px 0">
         <p style="margin:0;font-size:16px;line-height:26px;color:#334155">Hi ${firstName(person)},</p>
         <p style="margin:16px 0 0;font-size:16px;line-height:26px;color:#334155">
-          Based on what you told us, you may be a good fit for our study <strong style="color:#152b3e">${study.name}</strong>.${comp}
+          Based on what you told us, you may be a good fit for our study
+          <strong style="color:#152b3e">${study.name}</strong>.
         </p>
+        ${
+          study.description
+            ? `<p style="margin:14px 0 0;font-size:15px;line-height:24px;color:#475569">${study.description}</p>`
+            : ""
+        }
+      </td>
+    </tr>
+    ${
+      study.compensation
+        ? `<tr>
+      <td style="padding:20px 32px 0">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f0f4ee;border-radius:12px">
+          <tr>
+            <td style="padding:16px 20px">
+              <p style="margin:0 0 2px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#6f8767">Compensation</p>
+              <p style="margin:0;font-size:16px;line-height:24px;color:#152b3e">${study.compensation}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`
+        : ""
+    }
+    <tr>
+      <td style="padding:24px 32px 0;text-align:center">
+        <a href="${link}" style="display:inline-block;background:#1f3d57;color:#ffffff;font-size:15px;font-weight:600;padding:13px 32px;border-radius:8px;text-decoration:none">I'm interested</a>
       </td>
     </tr>
     <tr>
-      <td style="padding:24px 32px 0;text-align:center">
-        <a href="${link}" style="display:inline-block;background:#1f3d57;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none">I'm interested</a>
+      <td style="padding:18px 32px 0">
+        <p style="margin:0;font-size:14px;line-height:23px;color:#64748b;text-align:center">
+          Tap above to let us know and share your general availability.
+          We&rsquo;ll call you to set up a time &mdash; nothing to schedule online right now.
+        </p>
       </td>
     </tr>
     <tr>
