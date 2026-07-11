@@ -4,9 +4,18 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { archivePeople } from "@/app/people/actions";
-import type { Person } from "@/lib/types";
+import type { Person, CandidateStatus } from "@/lib/types";
+import type { StudyInvolvement } from "@/lib/people";
 
-export default function PeopleTable({ people }: { people: Person[] }) {
+type PersonRow = Person & { studies?: StudyInvolvement[] };
+
+export default function PeopleTable({
+  people,
+  showStudies = false,
+}: {
+  people: PersonRow[];
+  showStudies?: boolean;
+}) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -86,6 +95,9 @@ export default function PeopleTable({ people }: { people: Person[] }) {
               <th className="px-4 py-2 font-medium">Phone</th>
               <th className="px-4 py-2 font-medium">DOB</th>
               <th className="px-4 py-2 font-medium">Eye info</th>
+              {showStudies && (
+                <th className="px-4 py-2 font-medium">Studies</th>
+              )}
               <th className="px-4 py-2 font-medium">Source</th>
               <th className="px-4 py-2 font-medium">Status</th>
             </tr>
@@ -129,6 +141,11 @@ export default function PeopleTable({ people }: { people: Person[] }) {
                 <td className="px-4 py-2 text-slate-600">
                   <EyeSummary person={p} />
                 </td>
+                {showStudies && (
+                  <td className="px-4 py-2 text-slate-600">
+                    <StudiesSummary studies={p.studies ?? []} />
+                  </td>
+                )}
                 <td className="whitespace-nowrap px-4 py-2 text-slate-600">
                   {p.source ?? "-"}
                 </td>
@@ -157,6 +174,39 @@ function EyeSummary({ person: p }: { person: Person }) {
     >
       {parts.join(" · ")}
     </span>
+  );
+}
+
+const CAND_BADGE: Record<CandidateStatus, string> = {
+  eligible: "bg-sky-100 text-sky-700",
+  invited: "bg-indigo-100 text-indigo-700",
+  responded: "bg-amber-100 text-amber-700",
+  booked: "bg-emerald-100 text-emerald-700",
+  completed: "bg-teal-100 text-teal-700",
+  declined: "bg-rose-100 text-rose-700",
+  ineligible: "bg-slate-100 text-slate-500",
+};
+
+function StudiesSummary({ studies }: { studies: StudyInvolvement[] }) {
+  if (!studies.length) return <span className="text-slate-400">-</span>;
+  return (
+    <div className="flex flex-col gap-1">
+      {studies.map((s) => (
+        <span key={s.studyId} className="flex items-center gap-1">
+          <Link
+            href={`/studies/${s.studyId}`}
+            className="max-w-[9rem] truncate text-brand-dark hover:underline"
+          >
+            {s.studyName}
+          </Link>
+          <span
+            className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${CAND_BADGE[s.status]}`}
+          >
+            {s.status}
+          </span>
+        </span>
+      ))}
+    </div>
   );
 }
 

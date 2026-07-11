@@ -1,10 +1,10 @@
 import Link from "next/link";
 import AdminNav from "@/components/AdminNav";
 import SetupNotice from "@/components/SetupNotice";
-import PeopleTable from "@/components/PeopleTable";
+import PeopleBrowser from "@/components/PeopleBrowser";
 import { isSupabaseConfigured } from "@/lib/config";
-import { listPeople } from "@/lib/people";
-import type { Person } from "@/lib/types";
+import { listPeopleWithStudies, type PersonWithStudies } from "@/lib/people";
+import { listStudies } from "@/lib/studies";
 
 export const dynamic = "force-dynamic";
 
@@ -15,11 +15,13 @@ export default async function PeoplePage({
 }) {
   const search = searchParams.q ?? "";
 
-  let people: Person[] = [];
+  let people: PersonWithStudies[] = [];
+  let studies: { id: string; name: string }[] = [];
   let loadError: string | null = null;
   if (isSupabaseConfigured) {
     try {
-      people = await listPeople({ search });
+      people = await listPeopleWithStudies({ search });
+      studies = (await listStudies()).map((s) => ({ id: s.id, name: s.name }));
     } catch (e) {
       loadError = e instanceof Error ? e.message : "Failed to load people.";
     }
@@ -80,12 +82,7 @@ export default async function PeoplePage({
                   : "No people yet. Import your contact CSV to get started."}
               </p>
             ) : (
-              <PeopleTable people={people} />
-            )}
-            {people.length > 0 && (
-              <p className="mt-3 text-xs text-slate-400">
-                Showing {people.length} {people.length === 1 ? "person" : "people"}.
-              </p>
+              <PeopleBrowser people={people} studies={studies} />
             )}
           </>
         )}
