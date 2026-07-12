@@ -18,6 +18,11 @@ function formatDate(d: string | null) {
   });
 }
 
+function brandOf(rx: Record<string, unknown> | null): string {
+  const b = rx && typeof rx === "object" ? (rx as { brand?: unknown }).brand : null;
+  return typeof b === "string" && b.trim() ? b : "-";
+}
+
 function formatRx(rx: Record<string, unknown> | null): string {
   if (!rx) return "-";
   try {
@@ -125,6 +130,7 @@ export default async function PersonDetailPage({
               }
             />
             <Detail label="Contact Rx" value={formatRx(person.contact_rx)} />
+            <Detail label="Contact lens brand" value={brandOf(person.contact_rx)} />
             <Detail
               label="Eye conditions"
               value={person.eye_conditions?.length ? person.eye_conditions.join(", ") : "None"}

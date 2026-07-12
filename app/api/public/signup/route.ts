@@ -33,6 +33,7 @@ interface SignupBody {
   } | null;
   had_cataract_surgery?: "yes" | "no" | "";
   eye_conditions?: string[];
+  contact_brand?: string;
   notes?: string;
   consent?: boolean;
   source?: string;
@@ -130,10 +131,15 @@ export async function POST(req: NextRequest) {
     : [];
   const tags = body.wears_contacts ? ["contact_lens_wearer"] : [];
 
-  // Structured contact-lens prescription (per eye: sphere/cylinder/axis).
+  // Structured contact-lens prescription (per eye: sphere/cylinder/axis) plus
+  // the lens brand. Stored together in contact_rx so no schema change is needed.
   const od = sanitizeEye(body.contact_rx?.od);
   const os = sanitizeEye(body.contact_rx?.os);
-  const contactRx = body.wears_contacts && (od || os) ? { od, os } : null;
+  const brand = (body.contact_brand ?? "").toString().trim().slice(0, 60);
+  const contactRx =
+    body.wears_contacts && (od || os || brand)
+      ? { od, os, ...(brand ? { brand } : {}) }
+      : null;
 
   const values: PersonInput = {
     first_name: first,

@@ -12,6 +12,15 @@ const EYE_CONDITIONS = [
   "Keratoconus",
 ];
 
+// Common contact-lens brands people recognize on their box.
+const CONTACT_BRANDS = [
+  "Acuvue",
+  "Dailies",
+  "Air Optix",
+  "Biofinity",
+  "Bausch + Lomb",
+];
+
 // Standard contact-lens sphere powers, +8.00 down to -12.00 in 0.25 steps.
 const POWERS: string[] = (() => {
   const out: string[] = [];
@@ -61,6 +70,8 @@ export default function JoinForm() {
 
   const [conditions, setConditions] = useState<string[]>([]);
   const [wearsContacts, setWearsContacts] = useState("");
+  const [brand, setBrand] = useState("");
+  const [brandOther, setBrandOther] = useState("");
   const [odRx, setOdRx] = useState<EyeRx>(EMPTY_RX);
   const [osRx, setOsRx] = useState<EyeRx>(EMPTY_RX);
   const [busy, setBusy] = useState(false);
@@ -86,6 +97,13 @@ export default function JoinForm() {
     }
 
     setBusy(true);
+    const contactBrand = wears
+      ? brand === "Other"
+        ? brandOther.trim()
+        : brand === "Not sure"
+          ? ""
+          : brand
+      : "";
     const payload = {
       first_name: String(fd.get("first_name") ?? ""),
       last_name: String(fd.get("last_name") ?? ""),
@@ -93,6 +111,7 @@ export default function JoinForm() {
       phone: String(fd.get("phone") ?? ""),
       date_of_birth: String(fd.get("date_of_birth") ?? ""),
       wears_contacts: wears,
+      contact_brand: contactBrand,
       contact_rx: wears
         ? { od: eyePayload(odRx), os: eyePayload(osRx) }
         : null,
@@ -305,6 +324,34 @@ export default function JoinForm() {
 
         {wearsContacts === "yes" && (
           <div className="mt-4 space-y-3">
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-slate-700">
+                What brand of contacts do you wear?{" "}
+                <span className="text-slate-400">(optional)</span>
+              </span>
+              <select
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                className={inputCls}
+              >
+                <option value="">Choose...</option>
+                {CONTACT_BRANDS.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+                <option value="Not sure">Not sure</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            {brand === "Other" && (
+              <input
+                value={brandOther}
+                onChange={(e) => setBrandOther(e.target.value)}
+                placeholder="Type your contact lens brand"
+                className={inputCls}
+              />
+            )}
             {renderEye("Right eye (OD)", odRx, setOdRx)}
             {renderEye("Left eye (OS)", osRx, setOsRx)}
             <p className="text-xs text-slate-500">

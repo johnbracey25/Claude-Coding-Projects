@@ -13,6 +13,7 @@ interface Filters {
   ageMax: string;
   eyeCondition: string;
   ocular: string;
+  contactBrand: string;
   rxMin: string;
   rxMax: string;
   emailOptIn: string;
@@ -30,6 +31,7 @@ const EMPTY: Filters = {
   ageMax: "",
   eyeCondition: "",
   ocular: "",
+  contactBrand: "",
   rxMin: "",
   rxMax: "",
   emailOptIn: "",
@@ -105,6 +107,13 @@ export default function PeopleBrowser({
         return false;
       if (f.ocular === "any" && (p.ocular_health_issues ?? []).length === 0)
         return false;
+
+      if (f.contactBrand) {
+        const rx = p.contact_rx as { brand?: unknown } | null;
+        const b = rx && typeof rx === "object" ? String(rx.brand ?? "") : "";
+        if (!b.toLowerCase().includes(f.contactBrand.trim().toLowerCase()))
+          return false;
+      }
 
       if (f.rxMin || f.rxMax) {
         const powers = spherePowers(p.contact_rx);
@@ -263,6 +272,15 @@ export default function PeopleBrowser({
               value={f.eyeCondition}
               onChange={(e) => set({ eyeCondition: e.target.value })}
               placeholder="e.g. glaucoma"
+              className={inputCls}
+            />
+          </Field>
+
+          <Field label="Contact lens brand includes">
+            <input
+              value={f.contactBrand}
+              onChange={(e) => set({ contactBrand: e.target.value })}
+              placeholder="e.g. Acuvue"
               className={inputCls}
             />
           </Field>
