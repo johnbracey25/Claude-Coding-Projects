@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/studies", label: "Studies" },
   { href: "/calendar", label: "Calendar" },
   { href: "/messages", label: "Messages" },
+  { href: "/marketing", label: "Marketing" },
   { href: "/settings/mfa", label: "Settings" },
 ];
 
