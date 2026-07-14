@@ -65,6 +65,14 @@ const PRINT: Asset[] = [
     code: "card",
     tall: true,
   },
+  {
+    file: "eve-research-business-card-vertical-bleed.png",
+    title: "Business card — print/bleed",
+    points: "/join (signup form)",
+    code: "card",
+    tall: true,
+    note: "Upload this one to VistaPrint: 2.25×3.75in with 0.125in bleed.",
+  },
 ];
 
 function AssetCard({ a }: { a: Asset }) {
