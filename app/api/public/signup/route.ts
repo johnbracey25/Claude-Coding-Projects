@@ -133,13 +133,16 @@ export async function POST(req: NextRequest) {
 
   // Structured contact-lens prescription (per eye: sphere/cylinder/axis) plus
   // the lens brand. Stored together in contact_rx so no schema change is needed.
+  // A `wears:false` marker records an explicit "no" so it's distinguishable
+  // from people whose contact status was never captured (e.g. CSV imports).
   const od = sanitizeEye(body.contact_rx?.od);
   const os = sanitizeEye(body.contact_rx?.os);
   const brand = (body.contact_brand ?? "").toString().trim().slice(0, 60);
-  const contactRx =
-    body.wears_contacts && (od || os || brand)
+  const contactRx = body.wears_contacts
+    ? od || os || brand
       ? { od, os, ...(brand ? { brand } : {}) }
-      : null;
+      : { wears: true }
+    : { wears: false };
 
   const values: PersonInput = {
     first_name: first,

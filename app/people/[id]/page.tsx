@@ -32,9 +32,9 @@ function formatRx(rx: Record<string, unknown> | null): string {
     if (od?.sphere) parts.push(`OD: ${od.sphere}${od.cylinder ? ` / ${od.cylinder}` : ""}${od.axis ? ` x ${od.axis}` : ""}`);
     if (os?.sphere) parts.push(`OS: ${os.sphere}${os.cylinder ? ` / ${os.cylinder}` : ""}${os.axis ? ` x ${os.axis}` : ""}`);
     if (parts.length) return parts.join("  |  ");
-    return JSON.stringify(rx);
+    return "-";
   } catch {
-    return JSON.stringify(rx);
+    return "-";
   }
 }
 
