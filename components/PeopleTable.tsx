@@ -4,10 +4,57 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { archivePeople } from "@/app/people/actions";
+import { ageFromDob } from "@/lib/eligibility";
 import type { Person, CandidateStatus } from "@/lib/types";
 import type { StudyInvolvement } from "@/lib/people";
 
 type PersonRow = Person & { studies?: StudyInvolvement[] };
+
+// ── Contact-lens helpers ─────────────────────────────────────────────────────
+
+function wearsContacts(p: Person): boolean {
+  return (p.tags ?? []).includes("contact_lens_wearer") || !!p.contact_rx;
+}
+
+function eyeSphere(rx: Record<string, unknown> | null, eye: "od" | "os"): string | null {
+  if (!rx || typeof rx !== "object") return null;
+  const e = (rx as Record<string, unknown>)[eye];
+  if (e && typeof e === "object" && "sphere" in e) {
+    const s = (e as { sphere?: unknown }).sphere;
+    return s != null && String(s).trim() ? String(s) : null;
+  }
+  return e != null && String(e).trim() ? String(e) : null;
+}
+
+function powersShort(p: Person): string {
+  const rx = p.contact_rx;
+  const od = eyeSphere(rx, "od");
+  const os = eyeSphere(rx, "os");
+  const parts: string[] = [];
+  if (od) parts.push(`OD ${od}`);
+  if (os) parts.push(`OS ${os}`);
+  return parts.join(" / ");
+}
+
+function eyeFull(rx: Record<string, unknown> | null, eye: "od" | "os"): string {
+  if (!rx || typeof rx !== "object") return "—";
+  const e = (rx as Record<string, unknown>)[eye];
+  if (!e) return "—";
+  if (typeof e === "object") {
+    const o = e as { sphere?: unknown; cylinder?: unknown; axis?: unknown };
+    const s = o.sphere != null ? String(o.sphere) : "";
+    if (!s) return "—";
+    const c = o.cylinder != null && String(o.cylinder) ? ` / ${o.cylinder}` : "";
+    const a = o.axis != null && String(o.axis) ? ` x ${o.axis}` : "";
+    return `${s}${c}${a}`;
+  }
+  return String(e);
+}
+
+function brandOf(rx: Record<string, unknown> | null): string | null {
+  const b = rx && typeof rx === "object" ? (rx as { brand?: unknown }).brand : null;
+  return typeof b === "string" && b.trim() ? b : null;
+}
 
 export default function PeopleTable({
   people,
@@ -18,16 +65,16 @@ export default function PeopleTable({
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
+  const [hover, setHover] = useState<{ id: string; top: number; left: number } | null>(
+    null
+  );
   const router = useRouter();
 
   const allSelected = people.length > 0 && selected.size === people.length;
 
   function toggleAll() {
-    if (allSelected) {
-      setSelected(new Set());
-    } else {
-      setSelected(new Set(people.map((p) => p.id)));
-    }
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(people.map((p) => p.id)));
   }
 
   function toggle(id: string) {
@@ -37,6 +84,15 @@ export default function PeopleTable({
       else next.add(id);
       return next;
     });
+  }
+
+  function showQuick(e: React.MouseEvent, id: string) {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const width = 300;
+    let left = r.right + 10;
+    if (left + width > window.innerWidth - 8) left = Math.max(8, r.left - width - 10);
+    const top = Math.max(8, Math.min(r.top, window.innerHeight - 380));
+    setHover({ id, top, left });
   }
 
   function handleBulkDelete() {
@@ -54,6 +110,8 @@ export default function PeopleTable({
       router.refresh();
     });
   }
+
+  const hovered = hover ? people.find((p) => p.id === hover.id) : null;
 
   return (
     <>
@@ -94,70 +152,160 @@ export default function PeopleTable({
               <th className="px-4 py-2 font-medium">Email</th>
               <th className="px-4 py-2 font-medium">Phone</th>
               <th className="px-4 py-2 font-medium">DOB</th>
+              <th className="px-4 py-2 font-medium">Contacts</th>
               <th className="px-4 py-2 font-medium">Eye info</th>
-              {showStudies && (
-                <th className="px-4 py-2 font-medium">Studies</th>
-              )}
+              {showStudies && <th className="px-4 py-2 font-medium">Studies</th>}
               <th className="px-4 py-2 font-medium">Source</th>
               <th className="px-4 py-2 font-medium">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {people.map((p) => (
-              <tr
-                key={p.id}
-                className={`hover:bg-slate-50 ${selected.has(p.id) ? "bg-brand/5" : ""}`}
-              >
-                <td className="px-3 py-2">
-                  <input
-                    type="checkbox"
-                    checked={selected.has(p.id)}
-                    onChange={() => toggle(p.id)}
-                    className="rounded border-slate-300"
-                  />
-                </td>
-                <td className="whitespace-nowrap px-4 py-2">
-                  <Link
-                    href={`/people/${p.id}`}
-                    className="font-medium text-brand-dark hover:underline"
-                  >
-                    {p.last_name || p.first_name
-                      ? `${p.last_name}${p.last_name && p.first_name ? ", " : ""}${p.first_name}`
-                      : "(no name)"}
-                  </Link>
-                  {p.is_repeat_participant && (
-                    <span className="ml-2 rounded-full bg-sage/20 px-2 py-0.5 text-xs font-medium text-sage-dark">
-                      Repeat
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-2 text-slate-600">{p.email ?? "-"}</td>
-                <td className="whitespace-nowrap px-4 py-2 text-slate-600">
-                  {p.phone ?? "-"}
-                </td>
-                <td className="whitespace-nowrap px-4 py-2 text-slate-600">
-                  {p.date_of_birth ?? "-"}
-                </td>
-                <td className="px-4 py-2 text-slate-600">
-                  <EyeSummary person={p} />
-                </td>
-                {showStudies && (
-                  <td className="px-4 py-2 text-slate-600">
-                    <StudiesSummary studies={p.studies ?? []} />
+            {people.map((p) => {
+              const w = wearsContacts(p);
+              const powers = powersShort(p);
+              return (
+                <tr
+                  key={p.id}
+                  className={`hover:bg-slate-50 ${selected.has(p.id) ? "bg-brand/5" : ""}`}
+                >
+                  <td className="px-3 py-2">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.id)}
+                      onChange={() => toggle(p.id)}
+                      className="rounded border-slate-300"
+                    />
                   </td>
-                )}
-                <td className="whitespace-nowrap px-4 py-2 text-slate-600">
-                  {p.source ?? "-"}
-                </td>
-                <td className="px-4 py-2">
-                  <StatusBadge status={p.status} />
-                </td>
-              </tr>
-            ))}
+                  <td
+                    className="whitespace-nowrap px-4 py-2"
+                    onMouseEnter={(e) => showQuick(e, p.id)}
+                    onMouseLeave={() => setHover(null)}
+                  >
+                    <Link
+                      href={`/people/${p.id}`}
+                      className="font-medium text-brand-dark hover:underline"
+                    >
+                      {p.last_name || p.first_name
+                        ? `${p.last_name}${p.last_name && p.first_name ? ", " : ""}${p.first_name}`
+                        : "(no name)"}
+                    </Link>
+                    {p.is_repeat_participant && (
+                      <span className="ml-2 rounded-full bg-sage/20 px-2 py-0.5 text-xs font-medium text-sage-dark">
+                        Repeat
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">{p.email ?? "-"}</td>
+                  <td className="whitespace-nowrap px-4 py-2 text-slate-600">
+                    {p.phone ?? "-"}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2 text-slate-600">
+                    {p.date_of_birth ?? "-"}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2">
+                    {w ? (
+                      <>
+                        <span className="font-medium text-slate-700">Yes</span>
+                        {powers && (
+                          <p className="text-xs text-slate-500">{powers}</p>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-slate-400">No</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">
+                    <EyeSummary person={p} />
+                  </td>
+                  {showStudies && (
+                    <td className="px-4 py-2 text-slate-600">
+                      <StudiesSummary studies={p.studies ?? []} />
+                    </td>
+                  )}
+                  <td className="whitespace-nowrap px-4 py-2 text-slate-600">
+                    {p.source ?? "-"}
+                  </td>
+                  <td className="px-4 py-2">
+                    <StatusBadge status={p.status} />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {/* Hover quick view */}
+      {hovered && hover && (
+        <div
+          className="pointer-events-none fixed z-50 w-[300px] rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-lg"
+          style={{ top: hover.top, left: hover.left }}
+        >
+          <QuickView p={hovered} />
+        </div>
+      )}
     </>
+  );
+}
+
+function QuickView({ p }: { p: Person }) {
+  const name = `${p.first_name} ${p.last_name}`.trim() || "(no name)";
+  const age = ageFromDob(p.date_of_birth);
+  const w = wearsContacts(p);
+  const brand = brandOf(p.contact_rx);
+  const cataract =
+    p.had_cataract_surgery === true
+      ? "Yes"
+      : p.had_cataract_surgery === false
+        ? "No"
+        : "Unknown";
+
+  return (
+    <div>
+      <p className="font-semibold text-slate-900">{name}</p>
+      <p className="mt-0.5 text-xs text-slate-500">
+        {age != null ? `Age ${age}` : "Age —"}
+        {p.date_of_birth ? ` · ${p.date_of_birth}` : ""}
+      </p>
+
+      <div className="mt-3 space-y-1.5">
+        <Row label="Contacts" value={w ? "Yes" : "No"} />
+        {w && (
+          <>
+            {brand && <Row label="Brand" value={brand} />}
+            <Row label="OD" value={eyeFull(p.contact_rx, "od")} />
+            <Row label="OS" value={eyeFull(p.contact_rx, "os")} />
+          </>
+        )}
+        <Row label="Cataract surgery" value={cataract} />
+        <Row
+          label="Eye conditions"
+          value={p.eye_conditions?.length ? p.eye_conditions.join(", ") : "None"}
+        />
+        <Row
+          label="Ocular issues"
+          value={
+            p.ocular_health_issues?.length
+              ? p.ocular_health_issues.join(", ")
+              : "None"
+          }
+        />
+        {p.tags?.length ? <Row label="Tags" value={p.tags.join(", ")} /> : null}
+        <Row label="Source" value={p.source ?? "—"} />
+        {p.notes ? <Row label="Notes" value={p.notes} /> : null}
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-2">
+      <span className="w-28 flex-none text-xs font-medium text-slate-400">
+        {label}
+      </span>
+      <span className="text-xs text-slate-700">{value}</span>
+    </div>
   );
 }
 
