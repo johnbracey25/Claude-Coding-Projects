@@ -224,7 +224,7 @@ Writers", gradient tiles for creatives. No real brands, no invented clinical cla
   160 k rooms, trivial to type on a TV remote. Deck mints the code client-side;
   the room *is* the Supabase channel name — no row is written anywhere.
 - **Channel:** logical channel `hud:{code}` on the transport (§5.2). In the
-  Supabase adapter that is a Realtime broadcast channel (`self: false`,
+  Supabase implementation that is a Realtime broadcast channel (`self: false`,
   `ack: false`) + presence with role meta `{ role: "stage"|"deck"|"pocket" }`.
   The room code, not any URL or key, is the only shared identifier.
 - **Stage entry without typing:** `/hud/stage` shows a 4-key code screen with a big
@@ -279,7 +279,7 @@ namespace. The event contract above is the wire protocol, serialized as JSON.
 
 ### 5.3 Realtime message contract semantics
 
-`seq` is a monotonic per-sender counter stamped by the adapter; receivers drop
+`seq` is a monotonic per-sender counter stamped by the transport; receivers drop
 stale `seq` per event type (critical for `tune`/`spot` streams).
 
 | Event `t` | Payload `p` | Notes |
@@ -326,43 +326,40 @@ only real changes) — so a missed message self-heals within one heartbeat, sile
 
 ### 5.6 Repo integration, portability rules & lift-out procedure
 
-The demo is built on a personal repo/Vercel/Supabase but deploys for the client
-on a work environment that may share none of that. These rules are binding:
+Built on the personal repo/Vercel/Supabase; the client session deploys on the
+work account with the identical stack (its own Supabase + Vercel projects).
+Migration must be a folder copy plus env vars — these rules make it so:
 
 - **Strict containment.** All demo code lives in `app/hud/**`, `components/hud/**`,
   `lib/hud/**` (incl. `lib/hud/data/*.json`). No imports from the Eve Research
   app's `lib/*` (not `lib/supabase/*`, not `lib/config.ts`, not `lib/types.ts`)
-  — `lib/hud` re-declares the two lines of Supabase client creation inside its
-  own adapter. The only files outside the namespace that change at all:
-  `lib/supabase/middleware.ts` (add `"/hud"` to `PUBLIC_PREFIXES` — **found
-  blocker:** without it the middleware bounces the TV to `/login`) and
-  `app/sitemap.ts` (exclude `/hud`).
-- **Zero database.** Confirmed viable: no tables read or written, no migrations.
-  Synthetic data ships as static JSON in the repo; room state lives in the
-  realtime channel + Deck memory + Deck localStorage; polls tally in Deck memory.
-  The channel name is the room — nothing to provision, nothing to clean up.
-- **Zero hardcoded project identity.** All environment via three vars, read only
-  inside adapters: `NEXT_PUBLIC_HUD_TRANSPORT` (`supabase` default),
-  `NEXT_PUBLIC_HUD_SUPABASE_URL`, `NEXT_PUBLIC_HUD_SUPABASE_ANON_KEY`. On the
-  personal deploy these are set to the same values as the app's existing vars,
-  but the demo never reads the app's vars directly — so the work deploy needs no
-  archaeology. QR/join URLs are derived from `window.location.origin`, never
-  from config.
+  — the transport file creates its own browser client (two lines). The only
+  files outside the namespace that change at all: `lib/supabase/middleware.ts`
+  (add `"/hud"` to `PUBLIC_PREFIXES` — **found blocker:** without it the
+  middleware bounces the TV to `/login`) and `app/sitemap.ts` (exclude `/hud`).
+- **Zero database.** Confirmed viable: no tables read or written, no migrations,
+  no RLS. Synthetic data ships as static JSON in the repo; room state lives in
+  the realtime channel + Deck memory + Deck localStorage; polls tally in Deck
+  memory. The channel name is the room — nothing to provision or clean up, so a
+  fresh Supabase project works with zero setup beyond Realtime being enabled.
+- **Zero hardcoded project identity.** No Supabase URL or key appears anywhere
+  in code — the transport reads `NEXT_PUBLIC_SUPABASE_URL` /
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the standard vars, anon key only), and QR /
+  join URLs derive from `window.location.origin`, never from config. This is the
+  single property that makes the work migration trivial: point the same vars at
+  the work project and everything follows.
 - **Zero new dependencies.** Gestures are hand-rolled pointer-event math (~150
-  lines); charts are inline SVG. `@supabase/supabase-js` is only referenced by
-  the one adapter file, so a work deploy that swaps transports can drop it.
-- Personal-deploy setup note: verify **Realtime is enabled** on the Supabase
-  project (unused by the existing app, so assume unverified). Default rate
-  limits (≥100 msgs/s/channel) exceed our worst case (~60/s during a poll).
+  lines); charts are inline SVG; `@supabase/supabase-js` is already installed.
+- Setup note (both deploys): verify **Realtime is enabled** on the Supabase
+  project — it is unused by the existing app, so assume unverified. Default
+  rate limits (≥100 msgs/s/channel) exceed our worst case (~60/s during a poll).
 
-**Lift-out procedure (work deployment):** (1) `create-next-app` (or work's
-standard Next.js 14+ App Router skeleton) with Tailwind; (2) copy `app/hud`,
+**Lift-out procedure (work deployment):** (1) fresh Next.js 14+ App Router app
+with Tailwind (or the work repo's existing skeleton); (2) copy `app/hud`,
 `components/hud`, `lib/hud` verbatim; (3) ensure no auth middleware blocks
-`/hud` (in a fresh app there is none); (4) either set the two Supabase env vars
-against any Supabase project, or write `lib/hud/transport-<x>.ts` implementing
-`HudTransport` for the corporate-approved pub/sub and set
-`NEXT_PUBLIC_HUD_TRANSPORT=<x>`; (5) deploy, open `/hud/stage` on the TV. Steps
-1–3 are mechanical; step 4 is the only engineering, and it is one file.
+`/hud` (in a fresh app there is none); (4) set the two standard Supabase env
+vars to the work project's values; (5) deploy, open `/hud/stage` on the TV.
+No step involves code changes.
 
 ---
 
@@ -371,8 +368,7 @@ against any Supabase project, or write `lib/hud/transport-<x>.ts` implementing
 | Failure | Likelihood | Escape hatch |
 |---|---|---|
 | TV built-in browser too old / broken | High | Priority order rehearsed in advance: laptop + venue wireless-share → Fire TV stick browser → Tizen browser. Stage must pass a 5-min soak test on the actual venue TV the morning of |
-| Venue wifi captive portal / client isolation | High | Both devices on the presenter's phone hotspot. Traffic is device↔cloud (internet), never device↔device, so isolation is survivable as long as each device gets out |
-| Corporate network blocks websocket upgrades / odd ports (work deployment) | Medium–High | Everything runs on 443; but wss upgrades specifically can be killed by proxies. The transport seam (§5.2) exists for this: prefer an adapter with automatic HTTPS long-poll/SSE fallback (Ably/Pusher) or the self-hosted SSE+POST adapter, both plain HTTPS. Test on the actual work network before the session; hotspot remains the last resort |
+| Venue wifi flaky / captive portal / client isolation | High | Both devices on the presenter's phone hotspot. Traffic is device↔Supabase over standard HTTPS/wss (443), never device↔device, so isolation is survivable as long as each device gets out |
 | Tablet dies / freezes mid-demo | Medium | **Stage Autopilot:** press `A` (or via `?autopilot=1`) on the Stage — remote/keyboard arrows now ADVANCE beats, and each beat plays its scripted `autopilot` steps (auto-throws, a canned dial sweep, canned poll results). The demo finishes from the TV remote alone. Presenter narrates; nobody knows |
 | Supabase/Realtime outage | Low | Autopilot needs no network: beats + data are bundled in the page. The interactive demo degrades to a beautiful scripted one |
 | Poll flops (audience won't phone-in) | Medium | Deck poll screen has a "seed votes" button trickling in synthetic votes; presenter votes too; `poll:reveal` works at any tally |
@@ -391,9 +387,8 @@ last good frame with a tiny glyph.
 **M1 — the spine (build first; demoable end of M1)**
 1. Route scaffolding + add `/hud` to middleware `PUBLIC_PREFIXES`
 2. Room join: Deck mints code, Stage keypad entry (arrow-key navigable), presence
-3. `HudTransport` interface + Supabase adapter behind it (§5.2); envelope, seq
-   handling, heartbeat `sync:state`, `sync:req`. The seam is M1, not a refactor —
-   retrofitting it later is exactly the churn the work migration can't afford
+3. Realtime bus: `HudTransport` interface + its Supabase implementation (§5.2);
+   envelope, seq handling, heartbeat `sync:state`, `sync:req`
 4. Beat engine + ADVANCE (two-finger swipe + buttons) + Stage scene transitions
 5. THROW (recognizer, Deck exit anim, Stage landing, auto-compare) + RECALL
 6. Synthetic dataset + the 8 beats' Stage layouts (S1/S2/S3/S6), ugly-but-legible
