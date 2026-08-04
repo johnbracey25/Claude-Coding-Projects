@@ -8,6 +8,7 @@ const PUBLIC_PREFIXES = [
   "/about",
   "/login",
   "/book",
+  "/hud",
   "/r",
   "/calendar-help",
   "/getting-started",
