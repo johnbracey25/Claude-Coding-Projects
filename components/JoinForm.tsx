@@ -98,13 +98,19 @@ export default function JoinForm() {
       return;
     }
 
-    // Campaign code: prefer this page's URL, then the code captured on landing
-    // (SourceCapture stashes ?src/?source/?utm_source so it survives a
-    // homepage → Join click-through).
-    const stored =
+    // Campaign code, best available: this page's URL, then the explicit code
+    // captured on landing, then a source derived from the referrer. Lets
+    // homepage-landing campaigns and organic referrers still be attributed.
+    const storedCode =
       typeof window !== "undefined" ? sessionStorage.getItem("er_src") : null;
+    const storedRef =
+      typeof window !== "undefined" ? sessionStorage.getItem("er_src_ref") : null;
     const source =
-      params.get("src") ?? params.get("source") ?? stored ?? undefined;
+      params.get("src") ??
+      params.get("source") ??
+      storedCode ??
+      storedRef ??
+      undefined;
 
     setBusy(true);
     const contactBrand = wears
