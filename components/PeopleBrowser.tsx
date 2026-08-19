@@ -52,6 +52,21 @@ const EMPTY: Filters = {
 const inputCls =
   "w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
 
+const chipCls = (on: boolean) =>
+  `rounded-full border px-3 py-1 text-xs font-medium transition ${
+    on
+      ? "border-brand bg-brand text-white"
+      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+  }`;
+
+/** Toggle a value within a comma-separated multiselect string. */
+function toggleCsv(csv: string, val: string): string {
+  const arr = csv ? csv.split(",") : [];
+  return (arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]).join(
+    ","
+  );
+}
+
 function yesNo(v: boolean | null | undefined): boolean {
   return v === true;
 }
@@ -131,8 +146,8 @@ export default function PeopleBrowser({
       if (f.ocular === "any" && (p.ocular_health_issues ?? []).length === 0)
         return false;
 
-      if (f.contacts === "yes" && contactsStatus(p) !== "yes") return false;
-      if (f.contacts === "no" && contactsStatus(p) !== "no") return false;
+      if (f.contacts && !f.contacts.split(",").includes(contactsStatus(p)))
+        return false;
 
       if (f.contactBrand) {
         const rx = p.contact_rx as { brand?: unknown } | null;
@@ -339,15 +354,22 @@ export default function PeopleBrowser({
           </Field>
 
           <Field label="Wears contacts">
-            <select
-              value={f.contacts}
-              onChange={(e) => set({ contacts: e.target.value })}
-              className={inputCls}
-            >
-              <option value="">Any</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {[
+                ["yes", "Yes"],
+                ["no", "No"],
+                ["unknown", "Unknown"],
+              ].map(([val, label]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => set({ contacts: toggleCsv(f.contacts, val) })}
+                  className={chipCls(f.contacts.split(",").includes(val))}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </Field>
 
           <Field label="Contact lens brand includes">
