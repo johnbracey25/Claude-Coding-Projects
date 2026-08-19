@@ -66,7 +66,6 @@ const inputCls =
 
 export default function JoinForm() {
   const params = useSearchParams();
-  const source = params.get("src") ?? params.get("source") ?? undefined;
 
   const [conditions, setConditions] = useState<string[]>([]);
   const [wearsContacts, setWearsContacts] = useState("");
@@ -98,6 +97,14 @@ export default function JoinForm() {
       setError("Please select your contact lens power for both eyes.");
       return;
     }
+
+    // Campaign code: prefer this page's URL, then the code captured on landing
+    // (SourceCapture stashes ?src/?source/?utm_source so it survives a
+    // homepage → Join click-through).
+    const stored =
+      typeof window !== "undefined" ? sessionStorage.getItem("er_src") : null;
+    const source =
+      params.get("src") ?? params.get("source") ?? stored ?? undefined;
 
     setBusy(true);
     const contactBrand = wears
