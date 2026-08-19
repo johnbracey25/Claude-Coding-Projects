@@ -22,7 +22,10 @@ interface Filters {
   source: string;
   tag: string;
   study: string; // "" any | "__none__" | studyId
+  transferred: string; // "" any | "only" | "hide"
 }
+
+type SortKey = "name" | "newest" | "oldest";
 
 const EMPTY: Filters = {
   status: "",
@@ -41,6 +44,7 @@ const EMPTY: Filters = {
   source: "",
   tag: "",
   study: "",
+  transferred: "",
 };
 
 const inputCls =
@@ -71,6 +75,7 @@ export default function PeopleBrowser({
 }) {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<Filters>(EMPTY);
+  const [sort, setSort] = useState<SortKey>("name");
 
   const set = (patch: Partial<Filters>) => setF((prev) => ({ ...prev, ...patch }));
 
@@ -152,9 +157,30 @@ export default function PeopleBrowser({
       )
         return false;
 
+      if (f.transferred === "only" && p.source !== "transferred") return false;
+      if (f.transferred === "hide" && p.source === "transferred") return false;
+
       return true;
     });
   }, [people, f]);
+
+  const sorted = useMemo(() => {
+    const list = [...filtered];
+    if (sort === "newest" || sort === "oldest") {
+      list.sort((a, b) => {
+        const ta = new Date(a.created_at).getTime();
+        const tb = new Date(b.created_at).getTime();
+        return sort === "newest" ? tb - ta : ta - tb;
+      });
+    } else {
+      list.sort((a, b) => {
+        const an = `${a.last_name} ${a.first_name}`.trim().toLowerCase();
+        const bn = `${b.last_name} ${b.first_name}`.trim().toLowerCase();
+        return an.localeCompare(bn);
+      });
+    }
+    return list;
+  }, [filtered, sort]);
 
   return (
     <div className="mt-4">
@@ -182,6 +208,18 @@ export default function PeopleBrowser({
         <span className="text-xs text-slate-400">
           Showing {filtered.length} of {people.length}
         </span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-xs text-slate-400">Sort</span>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 focus:border-brand focus:outline-none"
+          >
+            <option value="name">Name (A–Z)</option>
+            <option value="newest">Newest added</option>
+            <option value="oldest">Oldest added</option>
+          </select>
+        </div>
       </div>
 
       {open && (
@@ -365,13 +403,25 @@ export default function PeopleBrowser({
               <option value="no">No</option>
             </select>
           </Field>
+
+          <Field label="Transferred contacts">
+            <select
+              value={f.transferred}
+              onChange={(e) => set({ transferred: e.target.value })}
+              className={inputCls}
+            >
+              <option value="">Any</option>
+              <option value="only">Only transferred</option>
+              <option value="hide">Hide transferred</option>
+            </select>
+          </Field>
         </div>
       )}
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="mt-6 text-slate-500">No people match these filters.</p>
       ) : (
-        <PeopleTable people={filtered} showStudies />
+        <PeopleTable people={sorted} showStudies />
       )}
     </div>
   );

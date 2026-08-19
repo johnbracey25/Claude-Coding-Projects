@@ -10,6 +10,17 @@ import type { StudyInvolvement } from "@/lib/people";
 
 type PersonRow = Person & { studies?: StudyInvolvement[] };
 
+function fmtCreated(iso: string | null): string {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 // ── Contact-lens helpers ─────────────────────────────────────────────────────
 
 function eyeSphere(rx: Record<string, unknown> | null, eye: "od" | "os"): string | null {
@@ -155,6 +166,7 @@ export default function PeopleTable({
               <th className="px-4 py-2 font-medium">Eye info</th>
               {showStudies && <th className="px-4 py-2 font-medium">Studies</th>}
               <th className="px-4 py-2 font-medium">Source</th>
+              <th className="px-4 py-2 font-medium">Added</th>
               <th className="px-4 py-2 font-medium">Status</th>
             </tr>
           </thead>
@@ -241,6 +253,9 @@ export default function PeopleTable({
                   )}
                   <td className="whitespace-nowrap px-4 py-2 text-slate-600">
                     {p.source ?? "-"}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2 text-slate-600">
+                    {fmtCreated(p.created_at)}
                   </td>
                   <td className="px-4 py-2">
                     <StatusBadge status={p.status} />
