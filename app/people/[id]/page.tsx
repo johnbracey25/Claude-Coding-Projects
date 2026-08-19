@@ -23,21 +23,6 @@ function brandOf(rx: Record<string, unknown> | null): string {
   return typeof b === "string" && b.trim() ? b : "-";
 }
 
-function glassesFrom(rx: Record<string, unknown> | null): {
-  answered: boolean;
-  wears: boolean;
-  rx: Record<string, unknown> | null;
-} {
-  if (!rx || typeof rx !== "object") return { answered: false, wears: false, rx: null };
-  const wg = (rx as { wears_glasses?: unknown }).wears_glasses;
-  const g = (rx as { glasses?: unknown }).glasses;
-  return {
-    answered: wg !== undefined,
-    wears: wg === true,
-    rx: g && typeof g === "object" ? (g as Record<string, unknown>) : null,
-  };
-}
-
 function formatRx(rx: Record<string, unknown> | null): string {
   if (!rx) return "-";
   try {
@@ -74,7 +59,11 @@ export default async function PersonDetailPage({
 
   const name =
     `${person.first_name} ${person.last_name}`.trim() || "(no name)";
-  const glasses = glassesFrom(person.contact_rx);
+  const glasses = {
+    answered: person.wears_glasses !== null,
+    wears: person.wears_glasses === true,
+    rx: person.glasses_rx,
+  };
 
   const statusLabel: Record<string, string> = {
     active: "Active",

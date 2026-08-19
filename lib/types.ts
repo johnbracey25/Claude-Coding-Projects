@@ -13,6 +13,8 @@ export interface Person {
   sms_opt_in: boolean;
   status: PersonStatus;
   contact_rx: Record<string, unknown> | null;
+  wears_glasses: boolean | null;
+  glasses_rx: Record<string, unknown> | null;
   eye_conditions: string[];
   had_cataract_surgery: boolean | null;
   ocular_health_issues: string[];

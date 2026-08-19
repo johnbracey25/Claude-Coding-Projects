@@ -149,16 +149,15 @@ export async function POST(req: NextRequest) {
       : { wears: true }
     : { wears: false };
 
-  // Glasses question is only asked when they don't wear contacts. Stored on the
-  // same object (optional Rx) so no schema change is needed.
-  if (!body.wears_contacts) {
-    contactRx.wears_glasses = body.wears_glasses === true;
-    const glassesOd = sanitizeEye(body.glasses_rx?.od);
-    const glassesOs = sanitizeEye(body.glasses_rx?.os);
-    if (body.wears_glasses && (glassesOd || glassesOs)) {
-      contactRx.glasses = { od: glassesOd, os: glassesOs };
-    }
-  }
+  // Glasses (its own columns). Only asked when they don't wear contacts, so
+  // contacts-wearers get null (not asked) rather than a false "no".
+  const glassesOd = sanitizeEye(body.glasses_rx?.od);
+  const glassesOs = sanitizeEye(body.glasses_rx?.os);
+  const wearsGlasses = body.wears_contacts ? null : body.wears_glasses === true;
+  const glassesRx =
+    !body.wears_contacts && body.wears_glasses && (glassesOd || glassesOs)
+      ? { od: glassesOd, os: glassesOs }
+      : null;
 
   const values: PersonInput = {
     first_name: first,
@@ -168,6 +167,8 @@ export async function POST(req: NextRequest) {
     date_of_birth: dob,
     had_cataract_surgery: body.had_cataract_surgery === "yes",
     contact_rx: contactRx,
+    wears_glasses: wearsGlasses,
+    glasses_rx: glassesRx,
     eye_conditions: eyeConditions,
     tags,
     notes: (body.notes ?? "").trim() || null,
@@ -222,6 +223,8 @@ export async function POST(req: NextRequest) {
           date_of_birth: dob,
           had_cataract_surgery: values.had_cataract_surgery,
           contact_rx: contactRx,
+          wears_glasses: wearsGlasses,
+          glasses_rx: glassesRx,
           eye_conditions: eyeConditions,
           tags,
           notes: values.notes,

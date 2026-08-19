@@ -117,12 +117,8 @@ export default function PeopleBrowser({
           return false;
       }
 
-      if (f.glasses === "yes" || f.glasses === "no") {
-        const rx = p.contact_rx as { wears_glasses?: unknown } | null;
-        const wg = rx && typeof rx === "object" ? rx.wears_glasses : undefined;
-        if (f.glasses === "yes" && wg !== true) return false;
-        if (f.glasses === "no" && wg !== false) return false;
-      }
+      if (f.glasses === "yes" && p.wears_glasses !== true) return false;
+      if (f.glasses === "no" && p.wears_glasses !== false) return false;
 
       if (f.rxMin || f.rxMax) {
         const powers = spherePowers(p.contact_rx);

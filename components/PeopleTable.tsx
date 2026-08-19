@@ -50,24 +50,15 @@ function powersShort(p: Person): string {
   return parts.join(" / ");
 }
 
-function glassesObj(rx: Record<string, unknown> | null): Record<string, unknown> | null {
-  const g = rx && typeof rx === "object" ? (rx as { glasses?: unknown }).glasses : null;
-  return g && typeof g === "object" ? (g as Record<string, unknown>) : null;
-}
-
 /** Yes = wears glasses, No = answered no, unknown = never asked. */
 function glassesStatus(p: Person): "yes" | "no" | "unknown" {
-  const rx = p.contact_rx;
-  if (rx && typeof rx === "object") {
-    const wg = (rx as { wears_glasses?: unknown }).wears_glasses;
-    if (wg === true) return "yes";
-    if (wg === false) return "no";
-  }
+  if (p.wears_glasses === true) return "yes";
+  if (p.wears_glasses === false) return "no";
   return "unknown";
 }
 
 function glassesPowersShort(p: Person): string {
-  const g = glassesObj(p.contact_rx);
+  const g = p.glasses_rx;
   const od = eyeSphere(g, "od");
   const os = eyeSphere(g, "os");
   const parts: string[] = [];
