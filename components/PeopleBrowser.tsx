@@ -13,6 +13,7 @@ interface Filters {
   ageMax: string;
   eyeCondition: string;
   ocular: string;
+  contacts: string;
   contactBrand: string;
   glasses: string;
   rxMin: string;
@@ -35,6 +36,7 @@ const EMPTY: Filters = {
   ageMax: "",
   eyeCondition: "",
   ocular: "",
+  contacts: "",
   contactBrand: "",
   glasses: "",
   rxMin: "",
@@ -64,6 +66,20 @@ function spherePowers(rx: Record<string, unknown> | null): number[] {
   return [(rx as { od?: unknown }).od, (rx as { os?: unknown }).os]
     .map(sphereOf)
     .filter((n) => Number.isFinite(n));
+}
+
+/** Yes = known wearer, No = answered no, unknown = never captured. */
+function contactsStatus(p: PersonWithStudies): "yes" | "no" | "unknown" {
+  if ((p.tags ?? []).includes("contact_lens_wearer")) return "yes";
+  const rx = p.contact_rx;
+  if (rx && typeof rx === "object") {
+    const r = rx as { brand?: unknown; wears?: unknown };
+    if (spherePowers(rx).length > 0 || (typeof r.brand === "string" && r.brand.trim()))
+      return "yes";
+    if (r.wears === true) return "yes";
+    if (r.wears === false) return "no";
+  }
+  return "unknown";
 }
 
 export default function PeopleBrowser({
@@ -114,6 +130,9 @@ export default function PeopleBrowser({
         return false;
       if (f.ocular === "any" && (p.ocular_health_issues ?? []).length === 0)
         return false;
+
+      if (f.contacts === "yes" && contactsStatus(p) !== "yes") return false;
+      if (f.contacts === "no" && contactsStatus(p) !== "no") return false;
 
       if (f.contactBrand) {
         const rx = p.contact_rx as { brand?: unknown } | null;
@@ -317,6 +336,18 @@ export default function PeopleBrowser({
               placeholder="e.g. glaucoma"
               className={inputCls}
             />
+          </Field>
+
+          <Field label="Wears contacts">
+            <select
+              value={f.contacts}
+              onChange={(e) => set({ contacts: e.target.value })}
+              className={inputCls}
+            >
+              <option value="">Any</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
           </Field>
 
           <Field label="Contact lens brand includes">
