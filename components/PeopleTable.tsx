@@ -50,6 +50,32 @@ function powersShort(p: Person): string {
   return parts.join(" / ");
 }
 
+function glassesObj(rx: Record<string, unknown> | null): Record<string, unknown> | null {
+  const g = rx && typeof rx === "object" ? (rx as { glasses?: unknown }).glasses : null;
+  return g && typeof g === "object" ? (g as Record<string, unknown>) : null;
+}
+
+/** Yes = wears glasses, No = answered no, unknown = never asked. */
+function glassesStatus(p: Person): "yes" | "no" | "unknown" {
+  const rx = p.contact_rx;
+  if (rx && typeof rx === "object") {
+    const wg = (rx as { wears_glasses?: unknown }).wears_glasses;
+    if (wg === true) return "yes";
+    if (wg === false) return "no";
+  }
+  return "unknown";
+}
+
+function glassesPowersShort(p: Person): string {
+  const g = glassesObj(p.contact_rx);
+  const od = eyeSphere(g, "od");
+  const os = eyeSphere(g, "os");
+  const parts: string[] = [];
+  if (od) parts.push(`OD ${od}`);
+  if (os) parts.push(`OS ${os}`);
+  return parts.join(" / ");
+}
+
 export default function PeopleTable({
   people,
   showStudies = false,
@@ -134,6 +160,7 @@ export default function PeopleTable({
               <th className="px-4 py-2 font-medium">DOB</th>
               <th className="px-4 py-2 font-medium">Age</th>
               <th className="px-4 py-2 font-medium">Contacts</th>
+              <th className="px-4 py-2 font-medium">Glasses</th>
               <th className="px-4 py-2 font-medium">Eye info</th>
               {showStudies && <th className="px-4 py-2 font-medium">Studies</th>}
               <th className="px-4 py-2 font-medium">Source</th>
@@ -144,6 +171,8 @@ export default function PeopleTable({
             {people.map((p) => {
               const cs = contactStatus(p);
               const powers = powersShort(p);
+              const gs = glassesStatus(p);
+              const gPowers = glassesPowersShort(p);
               const age = ageFromDob(p.date_of_birth);
               return (
                 <tr
@@ -192,6 +221,20 @@ export default function PeopleTable({
                         )}
                       </>
                     ) : cs === "no" ? (
+                      <span className="text-slate-600">No</span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2">
+                    {gs === "yes" ? (
+                      <>
+                        <span className="font-medium text-slate-700">Yes</span>
+                        {gPowers && (
+                          <p className="text-xs text-slate-500">{gPowers}</p>
+                        )}
+                      </>
+                    ) : gs === "no" ? (
                       <span className="text-slate-600">No</span>
                     ) : (
                       <span className="text-slate-400">—</span>

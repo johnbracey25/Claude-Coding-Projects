@@ -14,6 +14,7 @@ interface Filters {
   eyeCondition: string;
   ocular: string;
   contactBrand: string;
+  glasses: string;
   rxMin: string;
   rxMax: string;
   emailOptIn: string;
@@ -32,6 +33,7 @@ const EMPTY: Filters = {
   eyeCondition: "",
   ocular: "",
   contactBrand: "",
+  glasses: "",
   rxMin: "",
   rxMax: "",
   emailOptIn: "",
@@ -113,6 +115,13 @@ export default function PeopleBrowser({
         const b = rx && typeof rx === "object" ? String(rx.brand ?? "") : "";
         if (!b.toLowerCase().includes(f.contactBrand.trim().toLowerCase()))
           return false;
+      }
+
+      if (f.glasses === "yes" || f.glasses === "no") {
+        const rx = p.contact_rx as { wears_glasses?: unknown } | null;
+        const wg = rx && typeof rx === "object" ? rx.wears_glasses : undefined;
+        if (f.glasses === "yes" && wg !== true) return false;
+        if (f.glasses === "no" && wg !== false) return false;
       }
 
       if (f.rxMin || f.rxMax) {
@@ -283,6 +292,18 @@ export default function PeopleBrowser({
               placeholder="e.g. Acuvue"
               className={inputCls}
             />
+          </Field>
+
+          <Field label="Wears glasses">
+            <select
+              value={f.glasses}
+              onChange={(e) => set({ glasses: e.target.value })}
+              className={inputCls}
+            >
+              <option value="">Any</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
           </Field>
 
           <Field label="Contact lens power (sphere)">
