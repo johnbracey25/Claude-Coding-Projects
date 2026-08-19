@@ -97,6 +97,12 @@ function contactsStatus(p: PersonWithStudies): "yes" | "no" | "unknown" {
   return "unknown";
 }
 
+function glassesStatus(p: PersonWithStudies): "yes" | "no" | "unknown" {
+  if (p.wears_glasses === true) return "yes";
+  if (p.wears_glasses === false) return "no";
+  return "unknown";
+}
+
 export default function PeopleBrowser({
   people,
   studies,
@@ -156,8 +162,8 @@ export default function PeopleBrowser({
           return false;
       }
 
-      if (f.glasses === "yes" && p.wears_glasses !== true) return false;
-      if (f.glasses === "no" && p.wears_glasses !== false) return false;
+      if (f.glasses && !f.glasses.split(",").includes(glassesStatus(p)))
+        return false;
 
       if (f.rxMin || f.rxMax) {
         const powers = spherePowers(p.contact_rx);
@@ -382,15 +388,22 @@ export default function PeopleBrowser({
           </Field>
 
           <Field label="Wears glasses">
-            <select
-              value={f.glasses}
-              onChange={(e) => set({ glasses: e.target.value })}
-              className={inputCls}
-            >
-              <option value="">Any</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {[
+                ["yes", "Yes"],
+                ["no", "No"],
+                ["unknown", "Unknown"],
+              ].map(([val, label]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => set({ glasses: toggleCsv(f.glasses, val) })}
+                  className={chipCls(f.glasses.split(",").includes(val))}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </Field>
 
           <Field label="Contact lens power (sphere)">
