@@ -74,6 +74,9 @@ export default function JoinForm() {
   const [brandOther, setBrandOther] = useState("");
   const [odRx, setOdRx] = useState<EyeRx>(EMPTY_RX);
   const [osRx, setOsRx] = useState<EyeRx>(EMPTY_RX);
+  const [wearsGlasses, setWearsGlasses] = useState("");
+  const [glassesOd, setGlassesOd] = useState<EyeRx>(EMPTY_RX);
+  const [glassesOs, setGlassesOs] = useState<EyeRx>(EMPTY_RX);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +118,11 @@ export default function JoinForm() {
       contact_rx: wears
         ? { od: eyePayload(odRx), os: eyePayload(osRx) }
         : null,
+      wears_glasses: !wears && wearsGlasses === "yes",
+      glasses_rx:
+        !wears && wearsGlasses === "yes"
+          ? { od: eyePayload(glassesOd), os: eyePayload(glassesOs) }
+          : null,
       had_cataract_surgery: String(fd.get("had_cataract_surgery") ?? "") as
         | "yes"
         | "no"
@@ -145,7 +153,8 @@ export default function JoinForm() {
   function renderEye(
     label: string,
     rx: EyeRx,
-    setRx: (rx: EyeRx) => void
+    setRx: (rx: EyeRx) => void,
+    required = true
   ) {
     const hasCyl = !!rx.cylinder && rx.cylinder !== "unknown";
     return (
@@ -155,7 +164,7 @@ export default function JoinForm() {
           <label className="block">
             <span className="mb-1 block text-xs text-slate-500">Power (sphere)</span>
             <select
-              required
+              required={required}
               value={rx.sphere}
               onChange={(e) => setRx({ ...rx, sphere: e.target.value })}
               className={inputCls}
@@ -359,6 +368,39 @@ export default function JoinForm() {
               only to toric lenses for astigmatism. Choose &quot;Not sure&quot; for
               anything you don&apos;t have handy.
             </p>
+          </div>
+        )}
+
+        {wearsContacts === "no" && (
+          <div className="mt-4">
+            <span className="text-sm font-medium text-slate-700">
+              Do you wear glasses?
+            </span>
+            <select
+              required
+              value={wearsGlasses}
+              onChange={(e) => setWearsGlasses(e.target.value)}
+              className={`mt-1 ${inputCls}`}
+            >
+              <option value="">Please choose...</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+
+            {wearsGlasses === "yes" && (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700">
+                  Your glasses prescription{" "}
+                  <span className="text-slate-400">(optional)</span>
+                </p>
+                {renderEye("Right eye (OD)", glassesOd, setGlassesOd, false)}
+                {renderEye("Left eye (OS)", glassesOs, setGlassesOs, false)}
+                <p className="text-xs text-slate-500">
+                  Only if you have it handy — it&apos;s optional. Sphere,
+                  cylinder, and axis are on your prescription card.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

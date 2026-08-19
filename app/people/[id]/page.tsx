@@ -23,6 +23,21 @@ function brandOf(rx: Record<string, unknown> | null): string {
   return typeof b === "string" && b.trim() ? b : "-";
 }
 
+function glassesFrom(rx: Record<string, unknown> | null): {
+  answered: boolean;
+  wears: boolean;
+  rx: Record<string, unknown> | null;
+} {
+  if (!rx || typeof rx !== "object") return { answered: false, wears: false, rx: null };
+  const wg = (rx as { wears_glasses?: unknown }).wears_glasses;
+  const g = (rx as { glasses?: unknown }).glasses;
+  return {
+    answered: wg !== undefined,
+    wears: wg === true,
+    rx: g && typeof g === "object" ? (g as Record<string, unknown>) : null,
+  };
+}
+
 function formatRx(rx: Record<string, unknown> | null): string {
   if (!rx) return "-";
   try {
@@ -59,6 +74,7 @@ export default async function PersonDetailPage({
 
   const name =
     `${person.first_name} ${person.last_name}`.trim() || "(no name)";
+  const glasses = glassesFrom(person.contact_rx);
 
   const statusLabel: Record<string, string> = {
     active: "Active",
@@ -131,6 +147,12 @@ export default async function PersonDetailPage({
             />
             <Detail label="Contact Rx" value={formatRx(person.contact_rx)} />
             <Detail label="Contact lens brand" value={brandOf(person.contact_rx)} />
+            {glasses.answered && (
+              <Detail label="Wears glasses" value={glasses.wears ? "Yes" : "No"} />
+            )}
+            {glasses.wears && (
+              <Detail label="Glasses Rx" value={formatRx(glasses.rx)} />
+            )}
             <Detail
               label="Eye conditions"
               value={person.eye_conditions?.length ? person.eye_conditions.join(", ") : "None"}

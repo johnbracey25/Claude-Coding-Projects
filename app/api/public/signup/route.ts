@@ -31,6 +31,11 @@ interface SignupBody {
     od?: EyeRxInput | null;
     os?: EyeRxInput | null;
   } | null;
+  wears_glasses?: boolean;
+  glasses_rx?: {
+    od?: EyeRxInput | null;
+    os?: EyeRxInput | null;
+  } | null;
   had_cataract_surgery?: "yes" | "no" | "";
   eye_conditions?: string[];
   contact_brand?: string;
@@ -138,11 +143,22 @@ export async function POST(req: NextRequest) {
   const od = sanitizeEye(body.contact_rx?.od);
   const os = sanitizeEye(body.contact_rx?.os);
   const brand = (body.contact_brand ?? "").toString().trim().slice(0, 60);
-  const contactRx = body.wears_contacts
+  const contactRx: Record<string, unknown> = body.wears_contacts
     ? od || os || brand
       ? { od, os, ...(brand ? { brand } : {}) }
       : { wears: true }
     : { wears: false };
+
+  // Glasses question is only asked when they don't wear contacts. Stored on the
+  // same object (optional Rx) so no schema change is needed.
+  if (!body.wears_contacts) {
+    contactRx.wears_glasses = body.wears_glasses === true;
+    const glassesOd = sanitizeEye(body.glasses_rx?.od);
+    const glassesOs = sanitizeEye(body.glasses_rx?.os);
+    if (body.wears_glasses && (glassesOd || glassesOs)) {
+      contactRx.glasses = { od: glassesOd, os: glassesOs };
+    }
+  }
 
   const values: PersonInput = {
     first_name: first,
