@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SourceCapture from "@/components/SourceCapture";
+import TikTokPixel from "@/components/TikTokPixel";
 import "./globals.css";
 
 const heading = Playfair_Display({
@@ -61,6 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body className="min-h-screen font-sans">
+        <TikTokPixel />
         <SourceCapture />
         {children}
         <Analytics />

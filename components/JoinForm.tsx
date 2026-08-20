@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ttqTrack } from "@/lib/tiktok";
 
 const EYE_CONDITIONS = [
   "Dry eye",
@@ -155,6 +156,8 @@ export default function JoinForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Submission failed.");
+      // Conversion event for TikTok ads (and any future pixels).
+      ttqTrack("CompleteRegistration", { content_type: "lead", ...(source ? { source } : {}) });
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed.");
