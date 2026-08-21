@@ -137,6 +137,22 @@ export default function ConnectCalendarForm({ code = "" }: { code?: string }) {
                 </p>
               </div>
 
+              {/* Mark availability with TIME BLOCK */}
+              <div className="mt-6 rounded-xl border border-sage/30 bg-sage/10 p-4 text-sm text-slate-700">
+                <p className="font-semibold text-brand-dark">
+                  First, mark your availability: title those events{" "}
+                  <span className="rounded bg-white px-1.5 py-0.5 font-mono text-xs font-bold text-brand-dark ring-1 ring-sage/40">
+                    TIME BLOCK
+                  </span>
+                </p>
+                <p className="mt-1">
+                  On the calendar you connect below, create an event for each
+                  window you&apos;re free to see participants and title it exactly{" "}
+                  <strong>TIME BLOCK</strong>. Those are the only events we sync --
+                  everything else on your calendar stays private and hidden from us.
+                </p>
+              </div>
+
               {/* Step 1: Pick platform */}
               {!platform && (
                 <div className="mt-8 space-y-3">

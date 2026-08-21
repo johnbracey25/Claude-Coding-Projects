@@ -132,7 +132,7 @@ export default async function CalendarSetupPage() {
                     <input
                       name="keyword"
                       defaultValue={f.keyword ?? ""}
-                      placeholder="e.g. Available (blank = all events)"
+                      placeholder="TIME BLOCK (blank = all events)"
                       className="flex-1 rounded border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-brand focus:outline-none"
                     />
                     <button
@@ -192,7 +192,8 @@ export default async function CalendarSetupPage() {
               </span>
               <input
                 name="keyword"
-                placeholder="e.g. Available"
+                defaultValue="TIME BLOCK"
+                placeholder="TIME BLOCK"
                 className={inputCls}
               />
             </label>
@@ -204,10 +205,10 @@ export default async function CalendarSetupPage() {
             </button>
           </form>
           <p className="mt-2 text-xs text-slate-400">
-            Keyword filter is optional. If set, only events whose title contains
-            that word sync as availability (e.g. only events named
-            &ldquo;Available&rdquo;). Leave blank to treat every event as open
-            time.
+            Our standard keyword is <strong>TIME BLOCK</strong> — calendar owners
+            title their open windows &ldquo;TIME BLOCK,&rdquo; and only those
+            events sync as availability (everything else on their calendar stays
+            private). Leave blank to treat every event as open time.
           </p>
         </section>
 

@@ -105,9 +105,12 @@ export async function POST(req: NextRequest) {
     color = COLORS[(count ?? 0) % COLORS.length];
   }
 
+  // Standardize on the "TIME BLOCK" keyword: only events titled TIME BLOCK
+  // sync as availability, so nothing else on the person's calendar is exposed.
+  // Staff can still change this per-calendar on the Calendar Setup page.
   const { data: feed, error: insertErr } = await supabase
     .from("calendar_feeds")
-    .insert({ name, ics_url: icsUrl, color })
+    .insert({ name, ics_url: icsUrl, color, keyword: "TIME BLOCK" })
     .select()
     .single();
 
