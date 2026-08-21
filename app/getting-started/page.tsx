@@ -255,6 +255,50 @@ export default function GettingStartedPage() {
               </ol>
             </div>
 
+            <div>
+              <p className="font-semibold text-brand-dark">On Outlook (Outlook.com / Microsoft 365)</p>
+              <ol className="ml-1 mt-2 space-y-1.5">
+                <li className="flex gap-3">
+                  <span className="font-semibold text-sage-dark">1.</span>
+                  <span>
+                    Open{" "}
+                    <a
+                      href="https://outlook.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand-dark underline"
+                    >
+                      Outlook
+                    </a>{" "}
+                    in a browser and open your <strong>Calendar</strong>.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-sage-dark">2.</span>
+                  <span>
+                    Click the <strong>Settings</strong> gear, then{" "}
+                    <strong>Calendar → Shared calendars</strong>.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-sage-dark">3.</span>
+                  <span>
+                    Under <strong>Publish a calendar</strong>, pick your
+                    calendar, set it to <strong>Can view all details</strong>,
+                    and click <strong>Publish</strong>.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-semibold text-sage-dark">4.</span>
+                  <span>
+                    Copy the link ending in{" "}
+                    <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">.ics</code>{" "}
+                    (not the HTML one).
+                  </span>
+                </li>
+              </ol>
+            </div>
+
             <p>Send John the link and he&apos;ll take it from there.</p>
           </StepCard>
         </div>

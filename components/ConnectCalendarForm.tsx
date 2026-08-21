@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type Platform = "" | "google" | "apple";
+type Platform = "" | "google" | "apple" | "outlook";
 
 const GOOGLE_STEPS = [
   "Open Google Calendar on a computer (calendar.google.com).",
@@ -22,6 +22,21 @@ const APPLE_STEPS = [
   "Paste it below.",
 ];
 
+const OUTLOOK_STEPS = [
+  "Open Outlook Calendar in a web browser: go to outlook.com and click the calendar icon.",
+  'Click the Settings gear (top right). If you see "View all Outlook settings," click it.',
+  'Go to Calendar, then "Shared calendars."',
+  'Under "Publish a calendar," choose the calendar you want to share and set it to "Can view all details."',
+  'Click "Publish," then copy the link that ends in ".ics" (not the HTML one).',
+  "Paste it below.",
+];
+
+const STEPS: Record<Exclude<Platform, "">, string[]> = {
+  google: GOOGLE_STEPS,
+  apple: APPLE_STEPS,
+  outlook: OUTLOOK_STEPS,
+};
+
 const inputCls =
   "w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
 
@@ -34,7 +49,7 @@ export default function ConnectCalendarForm({ code = "" }: { code?: string }) {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const steps = platform === "google" ? GOOGLE_STEPS : APPLE_STEPS;
+  const steps = platform ? STEPS[platform] : APPLE_STEPS;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -153,6 +168,20 @@ export default function ConnectCalendarForm({ code = "" }: { code?: string }) {
                       <p className="font-medium text-slate-800">Apple Calendar</p>
                       <p className="text-xs text-slate-500">
                         iCloud, Mac, iPhone
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setPlatform("outlook")}
+                    className="flex w-full items-center gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm transition hover:border-brand hover:shadow"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 text-lg font-bold text-sky-700">
+                      O
+                    </span>
+                    <div>
+                      <p className="font-medium text-slate-800">Outlook Calendar</p>
+                      <p className="text-xs text-slate-500">
+                        Outlook.com, Microsoft 365
                       </p>
                     </div>
                   </button>
